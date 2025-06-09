@@ -13,6 +13,7 @@ BUILD=build
 BIN=bin
 LIB=lib
 SRC=src
+RESOURCES=resources
 
 EXE=$(BIN)/$(NAME)$(EXTENSION)
 
@@ -26,10 +27,11 @@ OBJ := $(patsubst %.c, %.o, $(SRC_C))
 all:$(OBJ) $(EXE)
 
 %.o: %.c
-	$(CC) -c $< -o $(BUILD)/$@
+	$(CC) -c $< -I$(SRC) -I$(LIB) -o $(BUILD)/$@
 
 $(EXE): $(OBJ)
-	$(CC) $(CLIB) $(addprefix $(BUILD)/, $(OBJ)) -o $@ 
+	$(CC) $(CLIB) -I$(SRC) -I$(LIB) $(addprefix $(BUILD)/, $(OBJ)) -o $@ 
+	cp $(RESOURCES) $(BIN) -ru
 
 run: $(EXE)
 	./$(EXE)
@@ -37,4 +39,4 @@ run: $(EXE)
 clean:
 	rm -rf $(BUILD)
 	rm -rf $(BIN)
-	mkdir $(BUILD) $(BIN) $(BUILD)/$(SRC) $(BUILD)/$(LIB)
+	mkdir $(BUILD) $(BIN) $(BUILD)/$(SRC) $(BUILD)/$(LIB) $(BIN)/$(RESOURCES)
