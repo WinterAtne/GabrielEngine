@@ -7,5 +7,5 @@ typedef struct {
 } ShaderProgram;
 
 ShaderProgram* MakeShaderProgram(const char* vertexShader, const char* fragmentShader);
-void Activate(ShaderProgram* program);
-void Delete(ShaderProgram* program);
+void ShaderProgramActivate(ShaderProgram* program);
+void ShaderProgramDelete(ShaderProgram* program);

@@ -62,11 +62,11 @@ ShaderProgram* MakeShaderProgram(const char* vertexShaderName, const char* fragm
 	return rtrn;
 }
 
-void Activate(ShaderProgram *program) {
+void ShaderProgramActivate(ShaderProgram *program) {
 	glUseProgram(program->program);
 }
 
-void Delete(ShaderProgram *program) {
+void ShaderProgramDelete(ShaderProgram *program) {
 	glDeleteProgram(program->program);
 }
 

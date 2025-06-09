@@ -1,12 +1,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h>
 
 #include <stdio.h>
 
 #include "shader.h"
 
-const int WINDOW_SIZE_X = 800;
-const int WINDOW_SIZE_Y = 800;
+const int WINDOW_SIZE_X = 1920;
+const int WINDOW_SIZE_Y = 1080;
+const float WINDOW_ASPECT = (float)WINDOW_SIZE_X/(float)WINDOW_SIZE_Y;
+const float WINDOW_SCALE = 64;
 const char* WINDOW_NAME = "Hello World!";
 
 int main() {
@@ -62,6 +65,28 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	ShaderProgramActivate(shaderProgram);
+
+	mat4 model; glm_mat4_identity(model);
+
+	mat4 view; glm_mat4_identity(view);
+	vec3 viewTranslation;
+	float viewTranslationValues[] = {1.5f, 1.0f, 0.0f};
+	glm_vec3_make(viewTranslationValues, viewTranslation);
+	glm_translate(view, viewTranslation);
+
+	mat4 proj; glm_mat4_identity(proj);
+	glm_ortho(-WINDOW_ASPECT * WINDOW_SCALE, WINDOW_ASPECT * WINDOW_SCALE, -WINDOW_SCALE, WINDOW_SCALE, 0.0f, 1.0f, proj);
+
+	int modelLoc = glGetUniformLocation(shaderProgram->program, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, *model);
+
+	int viewLoc = glGetUniformLocation(shaderProgram->program, "view");
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, *view);
+
+	int projLoc = glGetUniformLocation(shaderProgram->program, "proj");
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, *proj);
 	
 	// Main Loop
 	while(!glfwWindowShouldClose(window)) {
@@ -69,7 +94,6 @@ int main() {
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram->program);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -80,7 +104,7 @@ int main() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-	glDeleteProgram(shaderProgram->program);
+	ShaderProgramDelete(shaderProgram);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
