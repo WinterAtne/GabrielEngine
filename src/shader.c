@@ -30,8 +30,6 @@ const char* ReadFile(const char* name) {
 		exit(-1);
 	}
 
-	printf("%s\n", rtrn);
-
 	fclose(source);
 	return rtrn;
 }
@@ -62,5 +60,13 @@ ShaderProgram* MakeShaderProgram(const char* vertexShaderName, const char* fragm
 	free((void*)vertexShaderSource);
 	free((void*)fragmentShaderSource);
 	return rtrn;
+}
+
+void Activate(ShaderProgram *program) {
+	glUseProgram(program->program);
+}
+
+void Delete(ShaderProgram *program) {
+	glDeleteProgram(program->program);
 }
 

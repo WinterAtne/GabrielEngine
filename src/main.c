@@ -41,7 +41,6 @@ int main() {
 	};
 	
 	ShaderProgram* shaderProgram = MakeShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
-	printf("here\n");
 
 	GLuint VAO, VBO, EBO;
 
