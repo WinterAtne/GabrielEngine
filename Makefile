@@ -5,7 +5,7 @@ VERSION = 0.0.0
 # Variables
 SHELL=/bin/sh
 CC=clang
-CLIB=-ldl -lglfw
+CLIB=-ldl -lglfw -lm
 
 
 # Directories & Files

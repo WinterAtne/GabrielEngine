@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
+#include <stb_image.h>
 
 #include <stdio.h>
 
@@ -9,7 +10,7 @@
 const int WINDOW_SIZE_X = 1920;
 const int WINDOW_SIZE_Y = 1080;
 const float WINDOW_ASPECT = (float)WINDOW_SIZE_X/(float)WINDOW_SIZE_Y;
-const float WINDOW_SCALE = 64;
+const float WINDOW_SCALE = 1;
 const char* WINDOW_NAME = "Hello World!";
 
 int main() {
@@ -32,10 +33,10 @@ int main() {
 
 	// Setup Triangle
 	GLfloat vertices[] = {
-		-0.5f, -0.5f, 0.0f, // Bottom Left
-		 0.5f, -0.5f, 0.0f, // Bottom Right
-		-0.5f,  0.5f, 0.0f, // Top Left
-		 0.5,   0.5f, 0.0f, // Top Right
+		-0.5f,  0.5f,	0.0f, 0.0f, // Top Left
+		 0.5,   0.5f,	1.0f, 0.0f, // Top Right
+		-0.5f, -0.5f,	0.0f, 1.0f, // Bottom Left
+		 0.5f, -0.5f,	1.0f, 1.0f, // Bottom Right
 	};
 
 	GLuint indices[] = {
@@ -44,6 +45,7 @@ int main() {
 	};
 	
 	ShaderProgram* shaderProgram = MakeShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
+	ShaderProgramActivate(shaderProgram);
 
 	GLuint VAO, VBO, EBO;
 
@@ -59,25 +61,37 @@ int main() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
-	ShaderProgramActivate(shaderProgram);
+	// glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// glBindVertexArray(0);
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+
+	// Model
 	mat4 model; glm_mat4_identity(model);
+	vec3 modelTranslation;
+	float modelTranslationValues[] = {0.0f, 0.0f, 0.0f};
+	glm_vec3_make(modelTranslationValues, modelTranslation);
+	glm_translate(model, modelTranslation);
 
+	// Camera
 	mat4 view; glm_mat4_identity(view);
 	vec3 viewTranslation;
-	float viewTranslationValues[] = {1.5f, 1.0f, 0.0f};
+	float viewTranslationValues[] = {0.0f, 0.0f, 0.0f};
 	glm_vec3_make(viewTranslationValues, viewTranslation);
 	glm_translate(view, viewTranslation);
 
 	mat4 proj; glm_mat4_identity(proj);
-	glm_ortho(-WINDOW_ASPECT * WINDOW_SCALE, WINDOW_ASPECT * WINDOW_SCALE, -WINDOW_SCALE, WINDOW_SCALE, 0.0f, 1.0f, proj);
+	glm_ortho(
+				-WINDOW_ASPECT * WINDOW_SCALE, WINDOW_ASPECT * WINDOW_SCALE, // X
+				-WINDOW_SCALE, WINDOW_SCALE, // Y
+				 0.0f, 1.0f, // Z
+				 proj); // Dest
 
 	int modelLoc = glGetUniformLocation(shaderProgram->program, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, *model);
@@ -87,13 +101,41 @@ int main() {
 
 	int projLoc = glGetUniformLocation(shaderProgram->program, "proj");
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, *proj);
-	
+
+	// Texture
+	// load image, create texture and generate mipmaps
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("resources/textures/test_text.png", &width, &height, &nrChannels, 0);
+	if (!data) {
+		printf("no textures :(\n");
+		exit(-1);
+	} 
+
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	stbi_image_free(data);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	GLuint tex0Uni = glGetUniformLocation(shaderProgram->program, "tex0");
+	glUniform1i(tex0Uni, 0);
+
 	// Main Loop
 	while(!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		
+		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
