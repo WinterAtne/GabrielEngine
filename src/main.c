@@ -6,30 +6,26 @@
 #include <stdio.h>
 
 #include "shader.h"
+#include "render_queue.h"
+#include "utils.h"
 
 const int WINDOW_SIZE_X = 1920;
 const int WINDOW_SIZE_Y = 1080;
 const float WINDOW_ASPECT = (float)WINDOW_SIZE_X/(float)WINDOW_SIZE_Y;
 const float WINDOW_SCALE = 1;
-const char* WINDOW_NAME = "Hello World!";
+char* WINDOW_NAME = "Hello World!";
+
+void main_engine() {
+}
 
 int main() {
-	// Setup
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, WINDOW_NAME, NULL, NULL);
-	if (window == NULL) {
-		printf("Failled to create Window");
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	gladLoadGL();
-	glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
-	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+	engine_setup(
+			WINDOW_SIZE_X,
+			WINDOW_SIZE_Y,
+			WINDOW_SCALE,
+			WINDOW_NAME,
+			"resources/shaders/default.vert",
+			"resources/shaders/default.frag");
 
 	// Setup Triangle
 	GLfloat vertices[] = {
@@ -44,9 +40,6 @@ int main() {
 		2, 1, 3,
 	};
 	
-	ShaderProgram* shaderProgram = MakeShaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
-	ShaderProgramActivate(shaderProgram);
-
 	GLuint VAO, VBO, EBO;
 
 	glGenVertexArrays(1, &VAO);
@@ -93,13 +86,13 @@ int main() {
 				 0.0f, 1.0f, // Z
 				 proj); // Dest
 
-	int modelLoc = glGetUniformLocation(shaderProgram->program, "model");
+	int modelLoc = glGetUniformLocation(get_shaders()->program, "model");
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, *model);
 
-	int viewLoc = glGetUniformLocation(shaderProgram->program, "view");
+	int viewLoc = glGetUniformLocation(get_shaders()->program, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, *view);
 
-	int projLoc = glGetUniformLocation(shaderProgram->program, "proj");
+	int projLoc = glGetUniformLocation(get_shaders()->program, "proj");
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, *proj);
 
 	// Texture
@@ -126,28 +119,17 @@ int main() {
 	stbi_image_free(data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	GLuint tex0Uni = glGetUniformLocation(shaderProgram->program, "tex0");
+	GLuint tex0Uni = glGetUniformLocation(get_shaders()->program, "tex0");
 	glUniform1i(tex0Uni, 0);
 
 	// Main Loop
-	while(!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
-
-		glClear(GL_COLOR_BUFFER_BIT);
-		
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		glfwSwapBuffers(window);
-	}
+	engine_process(main_engine);
 
 	// Tear Down
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-	ShaderProgramDelete(shaderProgram);
-	glfwDestroyWindow(window);
+	engine_teardown();
 	glfwTerminate();
 	return 0;
 }
