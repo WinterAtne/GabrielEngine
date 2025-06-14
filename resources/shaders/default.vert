@@ -2,7 +2,7 @@
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec2 aTexCoord;
 
-uniform mat4 model[128];
+uniform mat4 model[16];
 uniform mat4 view;
 uniform mat4 proj;
 

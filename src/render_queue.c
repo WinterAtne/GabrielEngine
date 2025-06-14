@@ -11,15 +11,15 @@
 
 GLFWwindow* window;
 ShaderProgram* shaders;
-Sprite* sprite_queue;
-mat4* sprite_transform_queue;
-Texture* sprite_texture_queue;
-uint sprite_queue_end = 0; // Last element of sprite_queue
-uint sprite_queue_cap = 0; // Capacity of sprite_queue
 
-Texture* textures_list;
+#define MAX_SPRITES 16
+
+Sprite sprite_queue[MAX_SPRITES];
+mat4 sprite_transform_queue[MAX_SPRITES];
+Texture sprite_texture_queue[MAX_SPRITES];
+Texture textures_list[MAX_SPRITES];
+uint sprite_queue_end = 0; // Last element of sprite_queue
 uint textures_list_end = 0; // Last element of sprite_queue
-uint textures_list_cap = 0; // Capacity of sprite_queue
 
 void engine_setup(
 		int window_size_x,
@@ -68,19 +68,9 @@ void engine_setup(
 
 	int projLoc = glGetUniformLocation(get_shaders()->program, "proj");
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, *proj);
-
-	sprite_queue_cap = 16;
-	sprite_queue = malloc(sprite_queue_cap * sizeof(Sprite));
-	sprite_queue_cap = 16;
-	sprite_transform_queue = malloc(sprite_queue_cap * sizeof(mat4));
-
-	textures_list_cap = 16;
-	textures_list = malloc(textures_list_cap * sizeof(Texture));
 }
 
 void engine_teardown() {
-	free(sprite_queue);
-	free(textures_list);
 	ShaderProgramDelete(shaders);
 }
 
@@ -139,6 +129,11 @@ void engine_process(void (*func)()) {
 	int modelLoc = glGetUniformLocation(get_shaders()->program, "model");
 	glUniformMatrix4fv(modelLoc, sprite_queue_end, GL_FALSE, **sprite_transform_queue);
 
+	Texture tex = texture_make("resources/textures/test_text.png");
+	glBindTexture(GL_TEXTURE_2D, textures_list[tex]);
+	GLuint tex0Uni = glGetUniformLocation(get_shaders()->program, "tex0");
+	glUniform1i(tex0Uni, 0);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		glfwSwapBuffers(window);
@@ -171,19 +166,6 @@ ShaderProgram* get_shaders() {
 
 // Creation
 Sprite sprite_make() {
-	if (sprite_queue_end+2 == sprite_queue_cap) {
-		sprite_queue_cap *= 2;
-		Sprite* new_sprite_queue = realloc(sprite_queue, sprite_queue_cap * sizeof(Sprite));
-		mat4* new_transform_queue = realloc(sprite_transform_queue, sprite_queue_cap * sizeof(Sprite));
-		if (new_sprite_queue || new_transform_queue) {
-			ERROR("Sprite allocation failled");
-			exit(-1);
-		}
-
-		sprite_queue = new_sprite_queue;
-		sprite_transform_queue = new_transform_queue;
-	}
-	
 	sprite_queue[sprite_queue_end] = sprite_queue_end;
 	return sprite_queue_end++;
 }
@@ -194,7 +176,6 @@ void sprite_free(Sprite sprite) {
 
 // Transform
 void sprite_transform_set(Sprite sprite, mat4* new_transform) {
-	// memcpy(sprite_transform_queue[sprite], new_transform, sizeof(mat4));
 	glm_mat4_copy(*new_transform, sprite_transform_queue[sprite]);
 }
 
@@ -226,23 +207,12 @@ Texture sprite_texture_get(Sprite sprite) {
 
 /* ---- Texture stuff ---- */
 Texture texture_make(char* texture_location) {
-	if (textures_list_end+2 == textures_list_cap) {
-		textures_list_cap *= 2;
-		Texture* new_textures_list = realloc(textures_list, sprite_queue_cap * sizeof(Sprite));
-		if (new_textures_list) {
-			ERROR("Sprite allocation failled");
-		}
-
-		textures_list = new_textures_list;
-	}
-	
-	textures_list_end++;
 	// Texture
 	// load image, create texture and generate mipmaps
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("resources/textures/test_text.png", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(texture_location, &width, &height, &nrChannels, 0);
 	if (!data) {
-		printf("no textures :(\n");
+		ERROR("Failled to load textures");
 		exit(-1);
 	} 
 
@@ -260,9 +230,9 @@ Texture texture_make(char* texture_location) {
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	textures_list[textures_list_cap] = texture;
+	textures_list[textures_list_end] = texture;
 
-	return textures_list_end;
+	return textures_list_end++;
 }
 
 void texture_free(Texture tex) {
