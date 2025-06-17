@@ -6,20 +6,29 @@
 
 #include "sprite.h"
 #include "shader.h"
+#include "utils.h"
 
 /* ---- Constants ---- */
 const char* VERTEX_SHADER_LOCATION = "resources/shaders/default.vert";
 const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 
 /* ---- Variables ---- */
-GLuint VAO, VBO, EBO;
+GLuint VAO=0, VBO=0, EBO=0;
 ShaderProgram* shaders;
 int modeLoc;
+bool sprites_initialized = false;
 
 Sprite sprite_queue[16];
 
 // This function just sets up an absurd amount of opengl boilerplate
 void initialize_sprites(int window_x, int window_y, float window_scale) {
+	// Sprites should only be intialized once
+	if (sprites_initialized) {
+		error("Sprites already intialized");
+		return;
+	} else {
+		sprites_initialized = true;
+	}
 	/* ---- Shaders ---- */
 	ShaderProgram* shaders = MakeShaderProgram(VERTEX_SHADER_LOCATION, FRAGMENT_SHADER_LOCATION);
 	ShaderProgramActivate(shaders);
@@ -87,14 +96,18 @@ void initialize_sprites(int window_x, int window_y, float window_scale) {
 }
 
 /* ---- Private Functions ---- */
+
+// Assumes VAO is bound
 void render_sprite(Sprite* sprite) {
 	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
-	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 /* ---- Public Functions ---- */
 void draw_sprites() {
+	assert(VAO != 0);
+	glBindVertexArray(VAO);
+
 	for (int i = 0; i < 16; i++) {
 		if (sprite_queue[i].ID == 0) return;
 		render_sprite(&sprite_queue[i]);
@@ -110,7 +123,7 @@ void make_sprite(Sprite** sprite) {
 		glm_mat4_identity((*sprite)->transform);
 		return;
 	}
-	printf("FUCK\n");
+	error("Unable to allocate sprite");
 }
 
 void free_sprite(Sprite* sprite) {
