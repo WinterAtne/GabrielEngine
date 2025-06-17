@@ -1,17 +1,17 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
-#include <stb_image.h>
-
-#include <stdio.h>
-
-#include "shader.h"
 
 typedef struct {
-	uint ID;
+	int ID;
 	mat4 transform;
 } Sprite;
 
+// Initializing and Processing
+void initialize_sprites(int window_x, int window_y, float window_scale);
 void draw_sprites(); // Draws the sprite queue
-void make_sprite(Sprite* sprite, mat4 transform); // Makes sprite, and adds it to the queue
+
+// Creating
+void make_sprite(Sprite** sprite); // Makes sprite, and adds it to the queue
 void free_sprite(Sprite* sprite); // Frees sprite, and removes it from queue
+
+// Modifying
+void sprite_transform_translate(Sprite* sprite, vec3 translation);
