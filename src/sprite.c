@@ -4,8 +4,6 @@
 
 #include <string.h>
 
-#include <stb_image.h>
-
 #include "sprite.h"
 #include "shader.h"
 #include "utils.h"
@@ -95,7 +93,6 @@ void sprites_initialize(int window_x, int window_y, float window_scale) {
 
 	/* TESTING STUFF */
 	modeLoc = glGetUniformLocation(shaders.program, "model");
-
 	tex0Uni = glGetUniformLocation(shaders.program, "tex0");
 }
 

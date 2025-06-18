@@ -1,10 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <cglm/cglm.h>
-#include <stb_image.h>
 
 #include <stdio.h>
 
+#include "engine.h"
 #include "sprite.h"
 #include "texture.h"
 
@@ -15,24 +14,13 @@ const float WINDOW_SCALE = 1;
 const char* WINDOW_NAME = "Hello World!";
 
 int main() {
-	// Setup
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(WINDOW_SIZE_X, WINDOW_SIZE_Y, WINDOW_NAME, NULL, NULL);
-	if (window == NULL) {
-		printf("Failled to create Window");
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	gladLoadGL();
-	glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
-	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-
-	sprites_initialize(WINDOW_SIZE_X, WINDOW_SIZE_Y, WINDOW_SCALE);
+	engine_init(
+			WINDOW_SIZE_X,
+			WINDOW_SIZE_Y,
+			WINDOW_SCALE,
+			WINDOW_NAME,
+			(const float[4]){0.1f, 0.1f, 0.1f, 1.0f}
+			);
 
 	Texture tex0 = make_texture("resources/textures/test_text.png");
 	Sprite* s0 = sprite_make();
@@ -47,14 +35,7 @@ int main() {
 
 	// Main Loop
 	char i = 0;
-	while(!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
-
-
-		glClear(GL_COLOR_BUFFER_BIT);
-		
-		sprites_draw();
-
+	while(!engine_should_close()) {
 		Sprite* s2 = sprite_make();
 		sprite_transform_translate(s2, (vec3){0.1f*i, 0.1f*i, 0.0f});
 		sprite_texture_set(s2, tex0);
@@ -62,6 +43,10 @@ int main() {
 		Sprite* s3 = sprite_make();
 		sprite_transform_translate(s3, (vec3){-0.1f*i*((float)i/2), 0.1f*i, 0.0f});
 		sprite_texture_set(s3, tex1);
+
+		Sprite* s4 = sprite_make();
+		sprite_transform_translate(s4, (vec3){0.1f*i*((float)i/2), -0.1f*i*((float)i/2), 0.0f});
+		sprite_texture_set(s4, tex0);
 
 		if (i == 64) {
 			sprite_free(s0);
@@ -72,11 +57,10 @@ int main() {
 		}
 
 		i++;
-		glfwSwapBuffers(window);
+		engine_process();
 	}
 
 	// Tear Down
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	engine_end();
 	return 0;
 }
