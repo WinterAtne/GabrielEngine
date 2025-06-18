@@ -16,7 +16,7 @@ const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 
 /* ---- Variables ---- */
 GLuint VAO=0, VBO=0, EBO=0;
-ShaderProgram* shaders;
+Shader shaders;
 int modeLoc;
 bool sprites_initialized = false;
 
@@ -33,8 +33,8 @@ void initialize_sprites(int window_x, int window_y, float window_scale) {
 		sprites_initialized = true;
 	}
 	/* ---- Shaders ---- */
-	ShaderProgram* shaders = MakeShaderProgram(VERTEX_SHADER_LOCATION, FRAGMENT_SHADER_LOCATION);
-	ShaderProgramActivate(shaders);
+	shader_make(VERTEX_SHADER_LOCATION, FRAGMENT_SHADER_LOCATION, &shaders);
+	shader_activate(&shaders);
 
 	/* ---- Quad ---- */
 	GLfloat vertices[] = {
@@ -78,7 +78,7 @@ void initialize_sprites(int window_x, int window_y, float window_scale) {
 	glm_vec3_make(viewTranslationValues, viewTranslation);
 	glm_translate(view, viewTranslation);
 
-	int viewLoc = glGetUniformLocation(shaders->program, "view");
+	int viewLoc = glGetUniformLocation(shaders.program, "view");
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, *view);
 
 	float window_aspect = (float)window_x/(float)window_y;
@@ -89,15 +89,15 @@ void initialize_sprites(int window_x, int window_y, float window_scale) {
 				 0.0f, 1.0f, // Z
 				 proj); // Dest
 
-	int projLoc = glGetUniformLocation(shaders->program, "proj");
+	int projLoc = glGetUniformLocation(shaders.program, "proj");
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, *proj);
 
 
 	/* TESTING STUFF */
 	memset(sprite_queue, 0, 16 * sizeof(Sprite));
-	modeLoc = glGetUniformLocation(shaders->program, "model");
+	modeLoc = glGetUniformLocation(shaders.program, "model");
 
-	tex0Uni = glGetUniformLocation(shaders->program, "tex0");
+	tex0Uni = glGetUniformLocation(shaders.program, "tex0");
 }
 
 /* ---- Private Functions ---- */
