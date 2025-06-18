@@ -20,7 +20,7 @@ Shader shaders;
 GLuint modeLoc, tex0Uni;
 bool sprites_initialized = false;
 
-Sprite* sprite_queue = NULL;
+Sprite* sprite_queue = NULL; // Note: [0] is allways null and never used
 ulong sprite_queue_cap = 0;
 
 // This function just sets up an absurd amount of opengl boilerplate
@@ -113,24 +113,23 @@ void sprites_draw() {
 	assert(VAO != 0);
 	glBindVertexArray(VAO);
 
-	for (int i = 0; i < sprite_queue_cap; i++) {
-		if (sprite_queue[i].ID == -1) continue;
+	for (int i = 1; i < sprite_queue_cap; i++) {
+		if (sprite_queue[i].ID == 0) continue;
 		sprite_render(&sprite_queue[i]);
 	}
 }
 
-void sprite_make(Sprite** sprite) {
-	for (int i = 0; i < sprite_queue_cap; i++) {
-		if (sprite_queue[i].ID != -1) continue;
+Sprite* sprite_make() {
+	for (int i = 1; i < sprite_queue_cap; i++) {
+		if (sprite_queue[i].ID != 0) continue;
 
-		*sprite = &sprite_queue[i];
-		(*sprite)->ID = i+1;
-		glm_mat4_identity((*sprite)->transform);
-		return;
+		sprite_queue[i].ID = i;
+		glm_mat4_identity(sprite_queue[i].transform);
+		return &sprite_queue[i];
 	}
 
 	int sprite_queue_cap_old = sprite_queue_cap;
-	sprite_queue_cap += 16;
+	sprite_queue_cap += 16; // Would be better to multiply but that requires more initialization
 	Sprite* new_sprite_queue = realloc(sprite_queue, sprite_queue_cap * sizeof(Sprite));
 	if (new_sprite_queue == NULL) {
 		error("Unable to allocate sprite");
@@ -138,12 +137,12 @@ void sprite_make(Sprite** sprite) {
 	}
 
 	sprite_queue = new_sprite_queue;
-	memset(sprite_queue + sprite_queue_cap_old, -1, sprite_queue_cap - sprite_queue_cap_old);
-	sprite_make(sprite); // If it works...
+	memset(sprite_queue + sprite_queue_cap_old, 0, sprite_queue_cap - sprite_queue_cap_old);
+	return sprite_make(); // If it works its not a bad idea
 }
 
 void sprite_free(Sprite* sprite) {
-	
+	sprite->ID = 0;
 }
 
 void sprite_texture_set(Sprite* sprite, Texture texture) {

@@ -14,7 +14,7 @@ void sprites_initialize(int window_x, int window_y, float window_scale);
 void sprites_draw(); // Draws the sprite queue
 
 // Creating
-void sprite_make(Sprite** sprite); // Makes sprite, and adds it to the queue
+Sprite* sprite_make(); // Makes sprite, and adds it to the queue
 void sprite_free(Sprite* sprite); // Frees sprite, and removes it from queue
 
 // Modifying
