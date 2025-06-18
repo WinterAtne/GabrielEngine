@@ -34,27 +34,30 @@ int main() {
 
 	sprites_initialize(WINDOW_SIZE_X, WINDOW_SIZE_Y, WINDOW_SCALE);
 
-	Sprite* s0;
-	sprite_make(&s0);
-	sprite_transform_translate(s0, (vec3){1.0f, 0.5f, 0.0f});
 	Texture tex0 = make_texture("resources/textures/test_text.png");
-	sprite_texture_set(s0, tex0);
 
-	Sprite* s1;
-	sprite_make(&s1);
-	sprite_transform_translate(s1, (vec3){-1.0f, 0.5f, 0.0f});
-	Texture tex1 = make_texture("resources/textures/test_text_1.jpg");
-	sprite_texture_set(s1, tex1);
+	// Sprite* s1;
+	// sprite_make(&s1);
+	// sprite_transform_translate(s1, (vec3){-1.0f, 0.5f, 0.0f});
+	// Texture tex1 = make_texture("resources/textures/test_text_1.jpg");
+	// sprite_texture_set(s1, tex1);
 
 
 	// Main Loop
+	char i = 0;
 	while(!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+
+		Sprite* s0;
+		sprite_make(&s0);
+		sprite_transform_translate(s0, (vec3){0.1f*i, 0.1f*i, 0.0f});
+		sprite_texture_set(s0, tex0);
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		sprites_draw();
 
+		i++;
 		glfwSwapBuffers(window);
 	}
 

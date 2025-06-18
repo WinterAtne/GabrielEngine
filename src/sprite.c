@@ -17,11 +17,11 @@ const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 /* ---- Variables ---- */
 GLuint VAO=0, VBO=0, EBO=0;
 Shader shaders;
-int modeLoc;
+GLuint modeLoc, tex0Uni;
 bool sprites_initialized = false;
 
-Sprite sprite_queue[16];
-GLuint tex0Uni;
+Sprite* sprite_queue = NULL;
+ulong sprite_queue_cap = 0;
 
 // This function just sets up an absurd amount of opengl boilerplate
 void sprites_initialize(int window_x, int window_y, float window_scale) {
@@ -94,7 +94,6 @@ void sprites_initialize(int window_x, int window_y, float window_scale) {
 
 
 	/* TESTING STUFF */
-	memset(sprite_queue, 0, 16 * sizeof(Sprite));
 	modeLoc = glGetUniformLocation(shaders.program, "model");
 
 	tex0Uni = glGetUniformLocation(shaders.program, "tex0");
@@ -114,22 +113,33 @@ void sprites_draw() {
 	assert(VAO != 0);
 	glBindVertexArray(VAO);
 
-	for (int i = 0; i < 16; i++) {
-		if (sprite_queue[i].ID == 0) return;
+	for (int i = 0; i < sprite_queue_cap; i++) {
+		if (sprite_queue[i].ID == -1) continue;
 		sprite_render(&sprite_queue[i]);
 	}
 }
 
 void sprite_make(Sprite** sprite) {
-	for (int i = 0; i < 16; i++) {
-		if (sprite_queue[i].ID != 0) continue;
+	for (int i = 0; i < sprite_queue_cap; i++) {
+		if (sprite_queue[i].ID != -1) continue;
 
 		*sprite = &sprite_queue[i];
 		(*sprite)->ID = i+1;
 		glm_mat4_identity((*sprite)->transform);
 		return;
 	}
-	error("Unable to allocate sprite");
+
+	int sprite_queue_cap_old = sprite_queue_cap;
+	sprite_queue_cap += 16;
+	Sprite* new_sprite_queue = realloc(sprite_queue, sprite_queue_cap * sizeof(Sprite));
+	if (new_sprite_queue == NULL) {
+		error("Unable to allocate sprite");
+		exit(-1); //What do you want me to do?
+	}
+
+	sprite_queue = new_sprite_queue;
+	memset(sprite_queue + sprite_queue_cap_old, -1, sprite_queue_cap - sprite_queue_cap_old);
+	sprite_make(sprite); // If it works...
 }
 
 void sprite_free(Sprite* sprite) {
