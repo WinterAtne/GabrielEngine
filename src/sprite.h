@@ -10,12 +10,12 @@ typedef struct {
 } Sprite;
 
 // Initializing and Processing
-void initialize_sprites(int window_x, int window_y, float window_scale);
-void draw_sprites(); // Draws the sprite queue
+void sprites_initialize(int window_x, int window_y, float window_scale);
+void sprites_draw(); // Draws the sprite queue
 
 // Creating
-void make_sprite(Sprite** sprite); // Makes sprite, and adds it to the queue
-void free_sprite(Sprite* sprite); // Frees sprite, and removes it from queue
+void sprite_make(Sprite** sprite); // Makes sprite, and adds it to the queue
+void sprite_free(Sprite* sprite); // Frees sprite, and removes it from queue
 
 // Modifying
 void sprite_texture_set(Sprite* sprite, Texture texture);

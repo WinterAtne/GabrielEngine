@@ -24,7 +24,7 @@ Sprite sprite_queue[16];
 GLuint tex0Uni;
 
 // This function just sets up an absurd amount of opengl boilerplate
-void initialize_sprites(int window_x, int window_y, float window_scale) {
+void sprites_initialize(int window_x, int window_y, float window_scale) {
 	// Sprites should only be intialized once
 	if (sprites_initialized) {
 		error("Sprites already intialized");
@@ -103,24 +103,24 @@ void initialize_sprites(int window_x, int window_y, float window_scale) {
 /* ---- Private Functions ---- */
 
 // Assumes VAO is bound
-void render_sprite(Sprite* sprite) {
+void sprite_render(Sprite* sprite) {
 	bind_texture(sprite->texture, tex0Uni);
 	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 /* ---- Public Functions ---- */
-void draw_sprites() {
+void sprites_draw() {
 	assert(VAO != 0);
 	glBindVertexArray(VAO);
 
 	for (int i = 0; i < 16; i++) {
 		if (sprite_queue[i].ID == 0) return;
-		render_sprite(&sprite_queue[i]);
+		sprite_render(&sprite_queue[i]);
 	}
 }
 
-void make_sprite(Sprite** sprite) {
+void sprite_make(Sprite** sprite) {
 	for (int i = 0; i < 16; i++) {
 		if (sprite_queue[i].ID != 0) continue;
 
@@ -132,7 +132,7 @@ void make_sprite(Sprite** sprite) {
 	error("Unable to allocate sprite");
 }
 
-void free_sprite(Sprite* sprite) {
+void sprite_free(Sprite* sprite) {
 	
 }
 

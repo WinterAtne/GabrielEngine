@@ -32,16 +32,16 @@ int main() {
 	glViewport(0, 0, WINDOW_SIZE_X, WINDOW_SIZE_Y);
 	glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
-	initialize_sprites(WINDOW_SIZE_X, WINDOW_SIZE_Y, WINDOW_SCALE);
+	sprites_initialize(WINDOW_SIZE_X, WINDOW_SIZE_Y, WINDOW_SCALE);
 
 	Sprite* s0;
-	make_sprite(&s0);
+	sprite_make(&s0);
 	sprite_transform_translate(s0, (vec3){1.0f, 0.5f, 0.0f});
 	Texture tex = make_texture("resources/textures/test_text.png");
 	sprite_texture_set(s0, tex);
 
 	Sprite* s1;
-	make_sprite(&s1);
+	sprite_make(&s1);
 	sprite_transform_translate(s1, (vec3){-1.0f, 0.5f, 0.0f});
 
 
@@ -51,7 +51,7 @@ int main() {
 
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		draw_sprites();
+		sprites_draw();
 
 		glfwSwapBuffers(window);
 	}
