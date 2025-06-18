@@ -4,8 +4,8 @@
 
 typedef struct {
 	GLuint program;
-} ShaderProgram;
+} Shader;
 
-ShaderProgram* MakeShaderProgram(const char* vertexShader, const char* fragmentShader);
-void ShaderProgramActivate(ShaderProgram* program);
-void ShaderProgramDelete(ShaderProgram* program);
+void shader_make(const char* vertexShader, const char* fragmentShader, Shader* shader);
+void shader_activate(Shader* program);
+void shader_delete(Shader* program);

@@ -1,13 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <cglm/cglm.h>
-#include <stb_image.h>
 
-#include <stdio.h>
-
-#include "shader.h"
-#include "render_queue.h"
-#include "utils.h"
+#include "engine.h"
+#include "sprite.h"
+#include "texture.h"
 
 const int WINDOW_SIZE_X = 1920;
 const int WINDOW_SIZE_Y = 1080;
@@ -15,31 +11,54 @@ const float WINDOW_ASPECT = (float)WINDOW_SIZE_X/(float)WINDOW_SIZE_Y;
 const float WINDOW_SCALE = 1;
 char* WINDOW_NAME = "Hello World!";
 
-// GLuint VAO, texture;
-
-void main_engine() {
-	// glBindTexture(GL_TEXTURE_2D, texture);
-	// glBindVertexArray(VAO);
-	// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
 int main() {
-	engine_setup(
+	engine_init(
 			WINDOW_SIZE_X,
 			WINDOW_SIZE_Y,
 			WINDOW_SCALE,
 			WINDOW_NAME,
-			"resources/shaders/default.vert",
-			"resources/shaders/default.frag");
-	
+			(const float[4]){0.1f, 0.1f, 0.1f, 1.0f}
+			);
+
+	Texture tex0 = make_texture("resources/textures/test_text.png");
+	Sprite* s0 = sprite_make();
+	sprite_transform_translate(s0, (vec3){0.1f, 0.1f, 0.0f});
+	sprite_texture_set(s0, tex0);
+
+	Sprite* s1 = sprite_make();
+	sprite_transform_translate(s1, (vec3){-1.0f, 0.5f, 0.0f});
+	Texture tex1 = make_texture("resources/textures/test_text_1.jpg");
+	sprite_texture_set(s1, tex1);
+
+
 	// Main Loop
-	engine_process(main_engine);
+	char i = 0;
+	while(!engine_should_close()) {
+		Sprite* s2 = sprite_make();
+		sprite_transform_translate(s2, (vec3){0.1f*i, 0.1f*i, 0.0f});
+		sprite_texture_set(s2, tex0);
+
+		Sprite* s3 = sprite_make();
+		sprite_transform_translate(s3, (vec3){-0.1f*i*((float)i/2), 0.1f*i, 0.0f});
+		sprite_texture_set(s3, tex1);
+
+		Sprite* s4 = sprite_make();
+		sprite_transform_translate(s4, (vec3){0.1f*i*((float)i/2), -0.1f*i*((float)i/2), 0.0f});
+		sprite_texture_set(s4, tex0);
+
+		if (i == 64) {
+			sprite_free(s0);
+		} else if (i == 127) {
+			s0 = sprite_make();
+			sprite_transform_translate(s0, (vec3){0.1f, 0.1f, 0.0f});
+			sprite_texture_set(s0, tex0);
+		}
+
+		i++;
+		engine_process();
+	}
 
 	// Tear Down
-	// glDeleteVertexArrays(1, &VAO);
-	// glDeleteBuffers(1, &VBO);
-	// glDeleteBuffers(1, &EBO);
-	engine_teardown();
-	// glfwTerminate();
+	engine_end();
 	return 0;
 }
