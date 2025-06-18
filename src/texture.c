@@ -10,7 +10,7 @@ Texture make_texture(const char* texture_location) {
 	// Texture
 	// load image, create texture and generate mipmaps
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load(texture_location, &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(texture_location, &width, &height, &nrChannels, 4);
 	if (!data) {
 		error("Could not load texture")
 	} 
@@ -24,7 +24,7 @@ Texture make_texture(const char* texture_location) {
 	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	stbi_image_free(data);

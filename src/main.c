@@ -37,12 +37,14 @@ int main() {
 	Sprite* s0;
 	sprite_make(&s0);
 	sprite_transform_translate(s0, (vec3){1.0f, 0.5f, 0.0f});
-	Texture tex = make_texture("resources/textures/test_text.png");
-	sprite_texture_set(s0, tex);
+	Texture tex0 = make_texture("resources/textures/test_text.png");
+	sprite_texture_set(s0, tex0);
 
 	Sprite* s1;
 	sprite_make(&s1);
 	sprite_transform_translate(s1, (vec3){-1.0f, 0.5f, 0.0f});
+	Texture tex1 = make_texture("resources/textures/test_text_1.jpg");
+	sprite_texture_set(s1, tex1);
 
 
 	// Main Loop
