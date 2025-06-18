@@ -4,6 +4,8 @@
 
 #include <string.h>
 
+#include <stb_image.h>
+
 #include "sprite.h"
 #include "shader.h"
 #include "utils.h"
@@ -19,6 +21,7 @@ int modeLoc;
 bool sprites_initialized = false;
 
 Sprite sprite_queue[16];
+GLuint tex0Uni;
 
 // This function just sets up an absurd amount of opengl boilerplate
 void initialize_sprites(int window_x, int window_y, float window_scale) {
@@ -93,12 +96,15 @@ void initialize_sprites(int window_x, int window_y, float window_scale) {
 	/* TESTING STUFF */
 	memset(sprite_queue, 0, 16 * sizeof(Sprite));
 	modeLoc = glGetUniformLocation(shaders->program, "model");
+
+	tex0Uni = glGetUniformLocation(shaders->program, "tex0");
 }
 
 /* ---- Private Functions ---- */
 
 // Assumes VAO is bound
 void render_sprite(Sprite* sprite) {
+	bind_texture(sprite->texture, tex0Uni);
 	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -128,6 +134,10 @@ void make_sprite(Sprite** sprite) {
 
 void free_sprite(Sprite* sprite) {
 	
+}
+
+void sprite_texture_set(Sprite* sprite, Texture texture) {
+	sprite->texture = texture;
 }
 
 void sprite_transform_translate(Sprite* sprite, vec3 translation) {
