@@ -14,6 +14,7 @@ void shader_make(const char* vertexShaderName, const char* fragmentShaderName, S
 	const char* vertexShaderSource = file_read(vertexShaderName);
 	if (!vertexShaderSource) {
 		error("Vertex Shader could not be read");
+		free((void*)vertexShaderSource);
 		return;
 	}
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -21,6 +22,8 @@ void shader_make(const char* vertexShaderName, const char* fragmentShaderName, S
 	glCompileShader(vertexShader);
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
+		free((void*)vertexShaderSource);
+
 		GLint maxLength = 0;
 		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
 		GLchar* log = malloc(maxLength * sizeof(GLchar));
@@ -35,6 +38,7 @@ void shader_make(const char* vertexShaderName, const char* fragmentShaderName, S
 	const char* fragmentShaderSource = file_read(fragmentShaderName);
 	if (!fragmentShaderSource) {
 		error("Fragment Shader could not be read");
+		free((void*)fragmentShaderSource);
 		return;
 	}
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -42,6 +46,8 @@ void shader_make(const char* vertexShaderName, const char* fragmentShaderName, S
 	glCompileShader(fragmentShader);
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
+		free((void*)fragmentShaderSource);
+
 		GLint maxLength = 0;
 		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
 		GLchar* log = malloc(maxLength * sizeof(GLchar));
