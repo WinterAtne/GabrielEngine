@@ -1,8 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <stdio.h>
-
 #include "engine.h"
 #include "sprite.h"
 #include "texture.h"
@@ -11,7 +9,7 @@ const int WINDOW_SIZE_X = 1920;
 const int WINDOW_SIZE_Y = 1080;
 const float WINDOW_ASPECT = (float)WINDOW_SIZE_X/(float)WINDOW_SIZE_Y;
 const float WINDOW_SCALE = 1;
-const char* WINDOW_NAME = "Hello World!";
+char* WINDOW_NAME = "Hello World!";
 
 int main() {
 	engine_init(
