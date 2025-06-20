@@ -32,9 +32,10 @@ int main() {
 	// Main Loop
 	int i = 0;
 	while(!engine_should_close()) {
-		sprite_transform_scale(s0, (vec3){0.9999f, 1.01111f, 1.0f});
-		sprite_transform_rotate(s0, -0.01f);
-		sprite_transform_translate(s0, (vec3){0.001f, 0.001f, 0.0f});
+		camera_transform_translate((vec3){0.01f, 0.01f, 0.0});
+		// sprite_transform_scale(s0, (vec3){0.9999f, 1.01111f, 1.0f});
+		// sprite_transform_rotate(s0, -0.01f);
+		// sprite_transform_translate(s0, (vec3){0.001f, 0.001f, 0.0f});
 		i++;
 		engine_process();
 	}

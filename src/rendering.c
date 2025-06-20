@@ -15,10 +15,11 @@ const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 /* ---- Variables ---- */
 GLuint VAO=0, VBO=0, EBO=0;
 Shader shaders;
-GLuint modeLoc, tex0Uni;
+GLuint modeLoc, viewLoc, tex0Uni;
 bool sprites_initialized = false;
 
 Sprite* sprite_queue = NULL; // Note: [0] is allways null and never used
+mat4 viewMatrix;
 ulong sprite_queue_cap = 0;
 
 // This function just sets up an absurd amount of opengl boilerplate
@@ -69,16 +70,7 @@ void sprites_initialize(int window_x, int window_y, float window_scale) {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	/* ---- Render Matrix ---- */
-	mat4 view; glm_mat4_identity(view);
-	vec3 viewTranslation;
-	float viewTranslationValues[] = {0.0f, 0.0f, 0.0f};
-	glm_vec3_make(viewTranslationValues, viewTranslation);
-	glm_translate(view, viewTranslation);
-
-	int viewLoc = glGetUniformLocation(shaders.program, "view");
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, *view);
-
+	/* ---- Render Matricis ---- */
 	float window_aspect = (float)window_x/(float)window_y;
 	mat4 proj; glm_mat4_identity(proj);
 	glm_ortho(
@@ -90,9 +82,12 @@ void sprites_initialize(int window_x, int window_y, float window_scale) {
 	int projLoc = glGetUniformLocation(shaders.program, "proj");
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, *proj);
 
+	glm_mat4_identity(viewMatrix);
+	viewLoc = glGetUniformLocation(shaders.program, "view");
 
-	/* TESTING STUFF */
 	modeLoc = glGetUniformLocation(shaders.program, "model");
+
+	/* Textures */
 	tex0Uni = glGetUniformLocation(shaders.program, "tex0");
 }
 
@@ -106,9 +101,15 @@ void sprite_render(Sprite* sprite) {
 }
 
 /* ---- Public Functions ---- */
+void camera_transform_translate(vec3 translation) {
+	glm_vec3_negate(translation);
+	glm_translated(viewMatrix, translation);
+}
+
 void sprites_draw() {
 	assert(VAO != 0);
 	glBindVertexArray(VAO);
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, *viewMatrix);
 
 	for (int i = 1; i < sprite_queue_cap; i++) {
 		if (sprite_queue[i].ID == 0) continue;
