@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-#include "sprite.h"
+#include "rendering.h"
 #include "shader.h"
 #include "utils.h"
 

@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "sprite.h"
+#include "rendering.h"
 #include "utils.h"
 
 GLFWwindow* window;

@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "engine.h"
-#include "sprite.h"
+#include "rendering.h"
 #include "texture.h"
 
 const int WINDOW_SIZE_X = 800;
