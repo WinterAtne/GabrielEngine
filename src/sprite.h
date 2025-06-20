@@ -20,3 +20,5 @@ void sprite_free(Sprite* sprite); // Frees sprite, and removes it from queue
 // Modifying
 void sprite_texture_set(Sprite* sprite, Texture texture);
 void sprite_transform_translate(Sprite* sprite, vec3 translation);
+void sprite_transform_rotate(Sprite* sprite, float rotation);
+void sprite_transform_scale(Sprite* sprite, vec3 scale);

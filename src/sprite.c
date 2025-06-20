@@ -147,5 +147,13 @@ void sprite_texture_set(Sprite* sprite, Texture texture) {
 }
 
 void sprite_transform_translate(Sprite* sprite, vec3 translation) {
-	glm_translate(sprite->transform, translation);
+	glm_translated(sprite->transform, translation);
+}
+
+void sprite_transform_rotate(Sprite *sprite, float rotation) {
+	glm_spinned(sprite->transform, rotation, (vec3){0.0f, 0.0f, 1.0f});
+}
+
+void sprite_transform_scale(Sprite *sprite, vec3 scale) {
+	glm_scale(sprite->transform, scale);
 }
