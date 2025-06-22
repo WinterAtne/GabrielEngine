@@ -5,18 +5,13 @@
 #include "rendering.h"
 #include "texture.h"
 
-const int WINDOW_SIZE_X = 800;
-const int WINDOW_SIZE_Y = 600;
-const float WINDOW_ASPECT = (float)WINDOW_SIZE_X/(float)WINDOW_SIZE_Y;
-const float WINDOW_SCALE = 1;
-char* WINDOW_NAME = "Hello World!";
 
 int main() {
 	engine_init(
-			WINDOW_SIZE_X,
-			WINDOW_SIZE_Y,
-			WINDOW_SCALE,
-			WINDOW_NAME,
+			800,
+			600,
+			1,
+			"Hello World!",
 			(const float[4]){0.1f, 0.1f, 0.1f, 1.0f}
 			);
 
@@ -30,13 +25,8 @@ int main() {
 	sprite_texture_set(s1, tex1);
 
 	// Main Loop
-	int i = 0;
 	while(!engine_should_close()) {
-		camera_transform_translate((vec3){0.01f, 0.01f, 0.0});
-		// sprite_transform_scale(s0, (vec3){0.9999f, 1.01111f, 1.0f});
-		// sprite_transform_rotate(s0, -0.01f);
-		// sprite_transform_translate(s0, (vec3){0.001f, 0.001f, 0.0f});
-		i++;
+		camera_transform_translate((vec3){0.022f, 0.01f, 0.0});
 		engine_process();
 	}
 

@@ -12,26 +12,25 @@ CLIB=-ldl -lglfw -lm
 BUILD=build
 BIN=bin
 LIB=lib
-SRC=src
+SRC_DIR=src
 RESOURCES=resources
 
 EXE=$(BIN)/$(NAME)$(EXTENSION)
 
-SRC_C += $(wildcard $(addsuffix /*.c, $(SRC)))
-SRC_C += $(wildcard $(addsuffix /*.c, $(LIB)))
-OBJ := $(patsubst %.c, %.o, $(SRC_C))
+SRC += $(wildcard src/*.c)               # list of source files
+SRC += $(wildcard lib/*.c)               # list of source files
+OBJS = $(patsubst %.c, %.o, $(SRC)) # list of object files
 
 # Rules
 .PHONY:all
 
-all:$(OBJ) $(EXE)
+all:$(EXE)
 
 %.o: %.c
-	$(CC) -c $< -I$(SRC) -I$(LIB) -o $(BUILD)/$@
+	$(CC) -c $< -I$(SRC_DIR) -I$(LIB) -o $@
 
-$(EXE): $(OBJ)
-	$(CC) $(CLIB) -I$(SRC) -I$(LIB) $(addprefix $(BUILD)/, $(OBJ)) -o $@ 
-	cp $(RESOURCES) $(BIN) -ru
+$(EXE): $(OBJS)
+	$(CC) $(CLIB) -I$(SRC_DIR) -I$(LIB) $(OBJS) -o $@ 
 
 run: $(EXE)
 	./$(EXE)
@@ -39,4 +38,4 @@ run: $(EXE)
 clean:
 	rm -rf $(BUILD)
 	rm -rf $(BIN)
-	mkdir $(BUILD) $(BIN) $(BUILD)/$(SRC) $(BUILD)/$(LIB) $(BIN)/$(RESOURCES)
+	mkdir $(BUILD) $(BIN) $(BUILD)/$(SRC_DIR) $(BUILD)/$(LIB) $(BIN)/$(RESOURCES)
