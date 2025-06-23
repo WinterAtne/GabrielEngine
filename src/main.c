@@ -1,18 +1,9 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 #include "engine.h"
 #include "rendering.h"
 #include "texture.h"
 
 int main() {
-	engine_init(
-			800,
-			600,
-			1,
-			"Hello World!",
-			(const float[4]){0.1f, 0.1f, 0.1f, 1.0f}
-			);
+	engine_init(800, 600, 1, "Hello World!", (float[4]){0.1f, 0.1f, 0.1f, 1.0f});
 
 	Texture tex0 = texture_make("resources/textures/test_text.png");
 	Sprite* s0 = sprite_make();
@@ -25,7 +16,10 @@ int main() {
 
 	// Main Loop
 	while(!engine_should_close()) {
-		camera_transform_translate((vec3){0.022f, 0.01f, 0.0});
+		sprite_transform_scale(s0, (vec3){0.999f, 1.01f, 1.0f});
+		sprite_transform_rotate(s0, 0.001f);
+		sprite_transform_translate(s0, (vec3){0.001f, 0.001f, 0.0f});
+		// camera_transform_translate((vec3){0.022f, 0.01f, 0.0});
 		engine_process();
 	}
 

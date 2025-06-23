@@ -24,6 +24,7 @@ const char* file_read(const char* name) {
 
 	long err = fread((void*)text, 1, size, source);
 	if (err != size) {
+		free(text);
 		return NULL;
 	}
 

@@ -71,6 +71,7 @@ void shader_make(const char* vertexShaderName, const char* fragmentShaderName, S
 
 		glGetProgramInfoLog(shader->program, maxLength, &maxLength, log);
 		printf("Shader Failed to Link!\n> OpenGL Error: %s", log);
+		free(log);
 		exit(-1);
 	}
 
