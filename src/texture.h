@@ -6,5 +6,5 @@ typedef struct {
 	GLuint handle;
 } Texture;
 
-Texture make_texture(const char* texture_location);
-void bind_texture(Texture texture, GLuint location);
+Texture texture_make(const char* texture_location);
+void texture_bind(Texture texture, GLuint location);

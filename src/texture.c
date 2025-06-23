@@ -4,7 +4,7 @@
 
 #include "utils.h"
 
-Texture make_texture(const char* texture_location) {
+Texture texture_make(const char* texture_location) {
 	Texture texture;
 
 	// Texture
@@ -33,7 +33,7 @@ Texture make_texture(const char* texture_location) {
 	return texture;
 }
 
-void bind_texture(Texture texture, GLuint location) {
+void texture_bind(Texture texture, GLuint location) {
 	glBindTexture(GL_TEXTURE_2D, texture.handle);
 	glUniform1i(location, 0);
 }

@@ -16,7 +16,6 @@ const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 GLuint VAO=0, VBO=0, EBO=0;
 Shader shaders;
 GLuint modeLoc, viewLoc, tex0Uni;
-bool sprites_initialized = false;
 
 Sprite* sprite_queue = NULL; // Note: [0] is allways null and never used
 mat4 viewMatrix;
@@ -24,6 +23,7 @@ ulong sprite_queue_cap = 0;
 
 // This function just sets up an absurd amount of opengl boilerplate
 void sprites_initialize(int window_x, int window_y, float window_scale) {
+	static bool sprites_initialized = false;
 	// Sprites should only be intialized once
 	if (sprites_initialized) {
 		error("Sprites already intialized");
@@ -95,7 +95,7 @@ void sprites_initialize(int window_x, int window_y, float window_scale) {
 
 // Assumes VAO is bound
 void sprite_render(Sprite* sprite) {
-	bind_texture(sprite->texture, tex0Uni);
+	texture_bind(sprite->texture, tex0Uni);
 	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

@@ -17,6 +17,7 @@ EXE=$(BIN_DIR)/$(NAME)$(EXTENSION)
 
 SRC += $(wildcard $(SRC_DIR)/*.c)
 SRC += $(wildcard $(LIB_DIR)/*.c)
+INC += -I$(SRC_DIR) -I$(LIB_DIR)
 
 # Rules
 .PHONY:all
@@ -24,7 +25,7 @@ all: $(EXE) $(RESOURCES_DIR)
 
 # TODO: this should output .o files into a build_dir
 $(EXE): $(SRC)
-	$(CC) $(CLIB) -I$(SRC_DIR) -I$(LIB_DIR) $(SRC) -o $@
+	$(CC) $(CLIB) $(INC) $(SRC) -o $@
 
 # It would be nice if this only had to run when it changed
 .PHONY:$(RESOURCES_DIR)
