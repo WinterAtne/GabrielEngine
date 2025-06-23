@@ -7,35 +7,33 @@ SHELL=/bin/sh
 CC=clang
 CLIB=-ldl -lglfw -lm
 
-
 # Directories & Files
-BUILD=build
-BIN=bin
-LIB=lib
+BIN_DIR=bin
+LIB_DIR=lib
 SRC_DIR=src
-RESOURCES=resources
+RESOURCES_DIR=resources
 
-EXE=$(BIN)/$(NAME)$(EXTENSION)
+EXE=$(BIN_DIR)/$(NAME)$(EXTENSION)
 
-SRC += $(wildcard src/*.c)               # list of source files
-SRC += $(wildcard lib/*.c)               # list of source files
-OBJS = $(patsubst %.c, %.o, $(SRC)) # list of object files
+SRC += $(wildcard $(SRC_DIR)/*.c)
+SRC += $(wildcard $(LIB_DIR)/*.c)
 
 # Rules
 .PHONY:all
+all: $(EXE) $(RESOURCES_DIR)
 
-all:$(EXE)
+# TODO: this should output .o files into a build_dir
+$(EXE): $(SRC)
+	$(CC) $(CLIB) -I$(SRC_DIR) -I$(LIB_DIR) $(SRC) -o $@
 
-%.o: %.c
-	$(CC) -c $< -I$(SRC_DIR) -I$(LIB) -o $@
+# It would be nice if this only had to run when it changed
+.PHONY:$(RESOURCES_DIR)
+$(RESOURCES_DIR):
+	cp -ru $(RESOURCES_DIR) $(BIN_DIR)
 
-$(EXE): $(OBJS)
-	$(CC) $(CLIB) -I$(SRC_DIR) -I$(LIB) $(OBJS) -o $@ 
-
-run: $(EXE)
+run: all
 	./$(EXE)
 
 clean:
-	rm -rf $(BUILD)
-	rm -rf $(BIN)
-	mkdir $(BUILD) $(BIN) $(BUILD)/$(SRC_DIR) $(BUILD)/$(LIB) $(BIN)/$(RESOURCES)
+	rm -rf $(BIN_DIR)
+	mkdir $(BIN_DIR) $(BIN_DIR)/$(RESOURCES_DIR)
