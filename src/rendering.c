@@ -94,14 +94,15 @@ void sprites_initialize(int window_x, int window_y, float window_scale) {
 }
 
 /* ---- Private Functions ---- */
-void texture_bind(Texture texture, GLuint location) {
+void texture_bind(Texture texture) {
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.handle);
-	glUniform1i(location, 0);
+	glUniform1i(tex0Uni, 0);
 }
 
 // Assumes VAO is bound
 void sprite_render(Sprite* sprite) {
-	texture_bind(sprite->texture, tex0Uni);
+	texture_bind(sprite->texture);
 	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -141,7 +142,7 @@ Sprite* sprite_make() {
 	}
 
 	sprite_queue = new_sprite_queue;
-	memset(sprite_queue + sprite_queue_cap_old, 0, sprite_queue_cap - sprite_queue_cap_old);
+	memset(sprite_queue + sprite_queue_cap_old, 0, (sprite_queue_cap - sprite_queue_cap_old) * sizeof(Sprite));
 	return sprite_make(); // If it works its not a bad idea
 }
 
