@@ -21,7 +21,7 @@ GLuint modeLoc, viewLoc, tex0Uni;
 
 Sprite* sprite_queue = NULL; // Note: [0] is allways null and never used
 mat4 viewMatrix;
-ulong sprite_queue_cap = 0;
+ulong sprite_queue_cap = 1;
 
 // This function just sets up an absurd amount of opengl boilerplate
 void sprites_initialize(int window_x, int window_y, float window_scale) {
@@ -134,7 +134,7 @@ Sprite* sprite_make() {
 	}
 
 	int sprite_queue_cap_old = sprite_queue_cap;
-	sprite_queue_cap += 16; // Would be better to multiply but that requires more initialization
+	sprite_queue_cap *= 2;
 	Sprite* new_sprite_queue = realloc(sprite_queue, sprite_queue_cap * sizeof(Sprite));
 	if (new_sprite_queue == NULL) {
 		error("Unable to allocate sprite");
