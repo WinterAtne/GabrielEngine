@@ -6,11 +6,11 @@ int main() {
 	rendering_initialize(800, 600, 1, "Hello World!", (float[4]){0.1f, 0.1f, 0.1f, 1.0f});
 
 	Texture tex0 = texture_make("resources/textures/test_text.png");
-	SpriteID s0 = sprite_make();
+	Sprite s0 = sprite_make();
 	sprite_transform_translate(s0, (vec3){-0.5f, -0.0f, 0.0f});
 	sprite_texture_set(s0, tex0);
 
-	SpriteID s1 = sprite_make();
+	Sprite s1 = sprite_make();
 	sprite_transform_translate(s1, (vec3){-1.2f, 0.5f, 0.0f});
 	Texture tex1 = texture_make("resources/textures/test_text_1.jpg");
 	sprite_texture_set(s1, tex1);
@@ -25,7 +25,7 @@ int main() {
 		// glm_mat4_print(s0->transform, stdout);
 		// camera_transform_translate((vec3){0.022f, 0.01f, 0.0});
 
-		SpriteID s2 = sprite_make();
+		Sprite s2 = sprite_make();
 		sprite_transform_translate(s2, (vec3){0.01f*i, 0.012f*i, 0.0f});
 		sprite_transform_rotate(s2, 0.01f*i);
 		sprite_texture_set(s2, tex1);
