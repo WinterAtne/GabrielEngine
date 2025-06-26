@@ -10,42 +10,83 @@
 #include "shader.h"
 #include "utils.h"
 
+/* --- Types --- */
+typedef struct {
+	SpriteID ID;
+	mat4 transform;
+	Texture texture;
+} Sprite;
+
 /* ---- Constants ---- */
 const char* VERTEX_SHADER_LOCATION = "resources/shaders/default.vert";
 const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 
 /* ---- Variables ---- */
+GLFWwindow* window;
+
 GLuint VAO=0, VBO=0, EBO=0;
 Shader shaders;
 GLuint modeLoc, viewLoc, tex0Uni;
 
 Sprite* sprite_queue = NULL; // Note: [0] is allways null and never used
 mat4 viewMatrix;
-ulong sprite_queue_cap = 1;
+ulong sprite_queue_cap = 0;
+
+
+void glfw_error_callback(int error, const char* description) {
+	error(description);
+}
+
+void GLAPIENTRY glad_error_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+	error(message);
+}
 
 // This function just sets up an absurd amount of opengl boilerplate
-void sprites_initialize(int window_x, int window_y, float window_scale) {
-	static bool sprites_initialized = false;
+int rendering_initialize(int window_x, int window_y, float window_scale, const char* window_name, const float clear_color[4]) {
+	static bool rendering_initialized = false;
 	// Sprites should only be intialized once
-	if (sprites_initialized) {
-		error("Sprites already intialized");
-		return;
+	if (rendering_initialized) {
+		error("Rendering already initialized");
+		return -1;
 	} else {
-		sprites_initialized = true;
+		rendering_initialized = true;
 	}
+
+	if (!glfwInit()) {
+		error("glfw failled initialization")
+	}
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwSwapInterval(1); // Vsync = true
+
+	window = glfwCreateWindow(window_x, window_y, window_name, NULL, NULL);
+	if (window == NULL) {
+		error("Failled to initialize glfw")
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetErrorCallback(glfw_error_callback);
+	gladLoadGL();
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(glad_error_callback, 0);
+	glViewport(0, 0, window_x, window_y);
+	glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
+
 	/* ---- Shaders ---- */
 	shader_make(VERTEX_SHADER_LOCATION, FRAGMENT_SHADER_LOCATION, &shaders);
 	shader_activate(&shaders);
 
 	/* ---- Quad ---- */
-	GLfloat vertices[] = {
+	static const GLfloat vertices[] = {
 		-0.5f,  0.5f,	0.0f, 0.0f, // Top Left
 		 0.5,   0.5f,	1.0f, 0.0f, // Top Right
 		-0.5f, -0.5f,	0.0f, 1.0f, // Bottom Left
 		 0.5f, -0.5f,	1.0f, 1.0f, // Bottom Right
 	};
 
-	GLuint indices[] = {
+	static const GLuint indices[] = {
 		0, 1, 2,
 		2, 1, 3,
 	};
@@ -91,7 +132,10 @@ void sprites_initialize(int window_x, int window_y, float window_scale) {
 
 	/* Textures */
 	tex0Uni = glGetUniformLocation(shaders.program, "tex0");
+
+	return -1;
 }
+
 
 /* ---- Private Functions ---- */
 void texture_bind(Texture texture) {
@@ -102,15 +146,12 @@ void texture_bind(Texture texture) {
 
 // Assumes VAO is bound
 void sprite_render(Sprite* sprite) {
+	if (sprite->ID == 1) {
+		// glm_mat4_print(sprite->transform, stdout);
+	}
 	texture_bind(sprite->texture);
 	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
-/* ---- Public Functions ---- */
-void camera_transform_translate(vec3 translation) {
-	glm_vec3_negate(translation);
-	glm_translated(viewMatrix, translation);
 }
 
 void sprites_draw() {
@@ -124,17 +165,43 @@ void sprites_draw() {
 	}
 }
 
-Sprite* sprite_make() {
+/* ---- Public Functions ---- */
+int window_should_close() {
+	return glfwWindowShouldClose(window);
+}
+
+void window_close() {
+	glfwDestroyWindow(window);
+	glfwTerminate();
+}
+
+void rendering_process() {
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	sprites_draw();
+
+	glfwPollEvents();
+	glfwSwapBuffers(window);
+}
+
+void camera_transform_translate(vec3 translation) {
+	glm_vec3_negate(translation);
+	glm_translated(viewMatrix, translation);
+}
+
+SpriteID sprite_make() {
 	for (int i = 1; i < sprite_queue_cap; i++) {
 		if (sprite_queue[i].ID != 0) continue;
 
 		sprite_queue[i].ID = i;
 		glm_mat4_identity(sprite_queue[i].transform);
-		return &sprite_queue[i];
+		return sprite_queue[i].ID;
 	}
 
 	int sprite_queue_cap_old = sprite_queue_cap;
-	sprite_queue_cap *= 2;
+	if (sprite_queue_cap > 0) sprite_queue_cap *= 2;
+	else sprite_queue_cap = 4;
+
 	Sprite* new_sprite_queue = realloc(sprite_queue, sprite_queue_cap * sizeof(Sprite));
 	if (new_sprite_queue == NULL) {
 		error("Unable to allocate sprite");
@@ -143,27 +210,43 @@ Sprite* sprite_make() {
 
 	sprite_queue = new_sprite_queue;
 	memset(sprite_queue + sprite_queue_cap_old, 0, (sprite_queue_cap - sprite_queue_cap_old) * sizeof(Sprite));
+
 	return sprite_make(); // If it works its not a bad idea
 }
 
-void sprite_free(Sprite* sprite) {
-	sprite->ID = 0;
+void sprite_free(SpriteID sprite) {
+	if (sprite >= sprite_queue_cap) {
+		error("Attempted to modify out of bounds sprite");
+	}
+	sprite_queue[sprite].ID = 0;
 }
 
-void sprite_texture_set(Sprite* sprite, Texture texture) {
-	sprite->texture = texture;
+void sprite_texture_set(SpriteID sprite, Texture texture) {
+	if (sprite >= sprite_queue_cap) {
+		error("Attempted to modify out of bounds sprite");
+	}
+	sprite_queue[sprite].texture = texture;
 }
 
-void sprite_transform_translate(Sprite* sprite, vec3 translation) {
-	glm_translated(sprite->transform, translation);
+void sprite_transform_translate(SpriteID sprite, vec3 translation) {
+	if (sprite >= sprite_queue_cap) {
+		error("Attempted to modify out of bounds sprite");
+	}
+	glm_translated(sprite_queue[sprite].transform, translation);
 }
 
-void sprite_transform_rotate(Sprite *sprite, float rotation) {
-	glm_spinned(sprite->transform, rotation, (vec3){0.0f, 0.0f, 1.0f});
+void sprite_transform_rotate(SpriteID sprite, float rotation) {
+	if (sprite >= sprite_queue_cap) {
+		error("Attempted to modify out of bounds sprite");
+	}
+	glm_spinned(sprite_queue[sprite].transform, rotation, (vec3){0.0f, 0.0f, 1.0f});
 }
 
-void sprite_transform_scale(Sprite *sprite, vec3 scale) {
-	glm_scale(sprite->transform, scale);
+void sprite_transform_scale(SpriteID sprite, vec3 scale) {
+	if (sprite >= sprite_queue_cap) {
+		error("Attempted to modify out of bounds sprite");
+	}
+	glm_scale(sprite_queue[sprite].transform, scale);
 }
 
 // Textures
