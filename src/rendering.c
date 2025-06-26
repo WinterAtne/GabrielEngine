@@ -23,34 +23,34 @@ typedef struct {
 } InternalSprite;
 
 /* ---- Constants ---- */
-const char* VERTEX_SHADER_LOCATION = "resources/shaders/default.vert";
-const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
+static const char* VERTEX_SHADER_LOCATION = "resources/shaders/default.vert";
+static const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 
-const int INVALID_SPRITE_ID = -1;
-const int INITIAL_SPRITE_CAP = 16;
-const float SPRITE_CAP_MULTIPLIER = 2.0f;
+static const int INVALID_SPRITE_ID = -1;
+static const int INITIAL_SPRITE_CAP = 16;
+static const float SPRITE_CAP_MULTIPLIER = 2.0f;
 
 /* ---- Variables ---- */
-GLFWwindow* window;
+static GLFWwindow* window;
 
-GLuint VAO=0, VBO=0, EBO=0;
-Shader shaders;
-GLuint model_uniform_location;
-GLuint camera_uniform_location;
-GLuint texture_unifrom_location;
-mat4 projMatrix, viewMatrix;
+static GLuint VAO=0, VBO=0, EBO=0;
+static Shader default_shaders;
+static GLuint model_uniform_location;
+static GLuint camera_uniform_location;
+static GLuint texture_unifrom_location;
+static mat4 projMatrix, viewMatrix;
 
-InternalSprite* sprite_queue = NULL;
-int sprite_queue_cap = 0;
+static InternalSprite* sprite_queue = NULL;
+static int sprite_queue_cap = 0;
 
 /* ---- Fundemental Functions ---- */
 
 // TODO error callbacks could provide more information to user
-void glfw_error_callback(int error, const char* description) {
+static void glfw_error_callback(int error, const char* description) {
 	error(description);
 }
 
-void GLAPIENTRY glad_error_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+static void GLAPIENTRY glad_error_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 	error(message);
 }
 
@@ -90,8 +90,8 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 	glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
 
 	/* ---- Shaders ---- */
-	shader_make(VERTEX_SHADER_LOCATION, FRAGMENT_SHADER_LOCATION, &shaders);
-	shader_activate(&shaders);
+	shader_make(VERTEX_SHADER_LOCATION, FRAGMENT_SHADER_LOCATION, &default_shaders);
+	shader_activate(&default_shaders);
 
 	/* ---- Quad ---- */
 	static const GLfloat vertices[] = {
@@ -139,32 +139,33 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 				 projMatrix); // Dest
 
 	glm_mat4_identity(viewMatrix);
-	camera_uniform_location = glGetUniformLocation(shaders.program, "camera");
+	camera_uniform_location = glGetUniformLocation(default_shaders.program, "camera");
 
-	model_uniform_location = glGetUniformLocation(shaders.program, "model");
+	model_uniform_location = glGetUniformLocation(default_shaders.program, "model");
 
-	texture_unifrom_location = glGetUniformLocation(shaders.program, "tex0");
+	texture_unifrom_location = glGetUniformLocation(default_shaders.program, "tex0");
 
 	return 0;
 }
 
 /* ---- Private Functions ---- */
-void texture_bind(Texture texture) {
+static void texture_bind(Texture texture) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.handle);
 	glUniform1i(texture_unifrom_location, 0);
 }
 
 // Assumes VAO is bound
-void sprite_render(InternalSprite* sprite) {
+static void sprite_render(InternalSprite* sprite) {
 	texture_bind(sprite->texture);
 	glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void sprites_draw() {
+static void sprites_draw() {
 	assert(VAO != 0);
 	glBindVertexArray(VAO);
+
 	mat4 cameraMatrix;
 	glm_mul(projMatrix, viewMatrix, cameraMatrix);
 	glUniformMatrix4fv(camera_uniform_location, 1, GL_FALSE, *cameraMatrix);
