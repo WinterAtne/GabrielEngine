@@ -17,9 +17,8 @@ int main() {
 
 	// Main Loop
 	char i = 0;
-	int prevID = 2;
 	while(!window_should_close()) {
-		sprite_transform_scale(s0, (vec3){0.99999f, 1.0001f, 1.0f});
+		sprite_transform_scale(s0, (vec3){0.999f, 1.0011f, 1.0f});
 		sprite_transform_rotate(s0, 0.001f);
 		sprite_transform_translate(s0, (vec3){0.0001f, -0.0001f, 0.0f});
 		// glm_mat4_print(s0->transform, stdout);
@@ -29,6 +28,8 @@ int main() {
 		sprite_transform_translate(s2, (vec3){0.01f*i, 0.012f*i, 0.0f});
 		sprite_transform_rotate(s2, 0.01f*i);
 		sprite_texture_set(s2, tex1);
+
+		camera_transform_translate((vec3){-0.001f, 0.001f, 0.0f});
 
 		i++;
 		rendering_process();
