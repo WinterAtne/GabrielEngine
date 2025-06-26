@@ -1,6 +1,5 @@
 #include "engine.h"
 #include "rendering.h"
-#include "texture.h"
 
 int main() {
 	engine_init(800, 600, 1, "Hello World!", (float[4]){0.1f, 0.1f, 0.1f, 1.0f});

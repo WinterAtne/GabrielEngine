@@ -1,7 +1,10 @@
 #pragma once
+#include <glad/glad.h>
 #include <cglm/cglm.h>
 
-#include "texture.h"
+typedef struct {
+	GLuint handle;
+} Texture;
 
 typedef struct {
 	int ID;
@@ -14,6 +17,7 @@ void sprites_initialize(int window_x, int window_y, float window_scale);
 void sprites_draw(); // Draws the sprite queue
 
 // Creating
+Texture texture_make(const char* texture_location);
 Sprite* sprite_make(); // Makes sprite, and adds it to the queue
 void sprite_free(Sprite* sprite); // Frees sprite, and removes it from queue
 
