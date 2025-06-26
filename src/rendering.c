@@ -11,15 +11,24 @@
 #include "utils.h"
 
 /* --- Types --- */
+
+// Represents a sprite in memory containing all nessesary data to render.
+// ID is its index in the sprite_queue
 typedef struct {
-	SpriteID ID;
-	mat4 transform;
-	Texture texture;
-} Sprite;
+	Sprite ID;
+	mat4 transform;  // Probably make this a pointer
+	Texture texture; // Probably make this a pointer
+	// Color data
+	// Layer
+} InternalSprite;
 
 /* ---- Constants ---- */
 const char* VERTEX_SHADER_LOCATION = "resources/shaders/default.vert";
 const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
+
+const int INVALID_SPRITE_ID = -1;
+const int INITIAL_SPRITE_CAP = 16;
+const float SPRITE_CAP_MULTIPLIER = 2.0f;
 
 /* ---- Variables ---- */
 GLFWwindow* window;
@@ -27,12 +36,12 @@ GLFWwindow* window;
 GLuint VAO=0, VBO=0, EBO=0;
 Shader shaders;
 GLuint modeLoc, viewLoc, tex0Uni;
-
-Sprite* sprite_queue = NULL; // Note: [0] is allways null and never used
 mat4 viewMatrix;
-ulong sprite_queue_cap = 0;
 
+InternalSprite* sprite_queue = NULL;
+int sprite_queue_cap = 0;
 
+/* ---- Fundemental Functions ---- */
 void glfw_error_callback(int error, const char* description) {
 	error(description);
 }
@@ -41,7 +50,6 @@ void GLAPIENTRY glad_error_callback(GLenum source, GLenum type, GLuint id, GLenu
 	error(message);
 }
 
-// This function just sets up an absurd amount of opengl boilerplate
 int rendering_initialize(int window_x, int window_y, float window_scale, const char* window_name, const float clear_color[4]) {
 	static bool rendering_initialized = false;
 	// Sprites should only be intialized once
@@ -54,6 +62,7 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 
 	if (!glfwInit()) {
 		error("glfw failled initialization")
+		return -1;
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -136,7 +145,6 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 	return -1;
 }
 
-
 /* ---- Private Functions ---- */
 void texture_bind(Texture texture) {
 	glActiveTexture(GL_TEXTURE0);
@@ -145,10 +153,7 @@ void texture_bind(Texture texture) {
 }
 
 // Assumes VAO is bound
-void sprite_render(Sprite* sprite) {
-	if (sprite->ID == 1) {
-		// glm_mat4_print(sprite->transform, stdout);
-	}
+void sprite_render(InternalSprite* sprite) {
 	texture_bind(sprite->texture);
 	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -159,8 +164,8 @@ void sprites_draw() {
 	glBindVertexArray(VAO);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, *viewMatrix);
 
-	for (int i = 1; i < sprite_queue_cap; i++) {
-		if (sprite_queue[i].ID == 0) continue;
+	for (int i = 0; i < sprite_queue_cap; i++) {
+		if (sprite_queue[i].ID == INVALID_SPRITE_ID) continue;
 		sprite_render(&sprite_queue[i]);
 	}
 }
@@ -189,60 +194,63 @@ void camera_transform_translate(vec3 translation) {
 	glm_translated(viewMatrix, translation);
 }
 
-SpriteID sprite_make() {
-	for (int i = 1; i < sprite_queue_cap; i++) {
-		if (sprite_queue[i].ID != 0) continue;
+Sprite sprite_make() {
+	for (int i = 0; i < sprite_queue_cap; i++) {
+		if (sprite_queue[i].ID != INVALID_SPRITE_ID) continue;
 
 		sprite_queue[i].ID = i;
-		glm_mat4_identity(sprite_queue[i].transform);
 		return sprite_queue[i].ID;
 	}
 
 	int sprite_queue_cap_old = sprite_queue_cap;
-	if (sprite_queue_cap > 0) sprite_queue_cap *= 2;
-	else sprite_queue_cap = 4;
+	if (sprite_queue_cap > 0) sprite_queue_cap *= SPRITE_CAP_MULTIPLIER;
+	else sprite_queue_cap = INITIAL_SPRITE_CAP;
 
-	Sprite* new_sprite_queue = realloc(sprite_queue, sprite_queue_cap * sizeof(Sprite));
+	InternalSprite* new_sprite_queue = realloc(sprite_queue, sprite_queue_cap * sizeof(InternalSprite));
 	if (new_sprite_queue == NULL) {
 		error("Unable to allocate sprite");
 		exit(-1); //What do you want me to do?
 	}
 
 	sprite_queue = new_sprite_queue;
-	memset(sprite_queue + sprite_queue_cap_old, 0, (sprite_queue_cap - sprite_queue_cap_old) * sizeof(Sprite));
+
+	for (int i = sprite_queue_cap_old; i < sprite_queue_cap; i++) {
+		sprite_queue[i].ID = INVALID_SPRITE_ID;
+		glm_mat4_identity(sprite_queue[i].transform);
+	}
 
 	return sprite_make(); // If it works its not a bad idea
 }
 
-void sprite_free(SpriteID sprite) {
+void sprite_free(Sprite sprite) {
 	if (sprite >= sprite_queue_cap) {
 		error("Attempted to modify out of bounds sprite");
 	}
-	sprite_queue[sprite].ID = 0;
+	sprite_queue[sprite].ID = INVALID_SPRITE_ID;
 }
 
-void sprite_texture_set(SpriteID sprite, Texture texture) {
+void sprite_texture_set(Sprite sprite, Texture texture) {
 	if (sprite >= sprite_queue_cap) {
 		error("Attempted to modify out of bounds sprite");
 	}
 	sprite_queue[sprite].texture = texture;
 }
 
-void sprite_transform_translate(SpriteID sprite, vec3 translation) {
+void sprite_transform_translate(Sprite sprite, vec3 translation) {
 	if (sprite >= sprite_queue_cap) {
 		error("Attempted to modify out of bounds sprite");
 	}
 	glm_translated(sprite_queue[sprite].transform, translation);
 }
 
-void sprite_transform_rotate(SpriteID sprite, float rotation) {
+void sprite_transform_rotate(Sprite sprite, float rotation) {
 	if (sprite >= sprite_queue_cap) {
 		error("Attempted to modify out of bounds sprite");
 	}
 	glm_spinned(sprite_queue[sprite].transform, rotation, (vec3){0.0f, 0.0f, 1.0f});
 }
 
-void sprite_transform_scale(SpriteID sprite, vec3 scale) {
+void sprite_transform_scale(Sprite sprite, vec3 scale) {
 	if (sprite >= sprite_queue_cap) {
 		error("Attempted to modify out of bounds sprite");
 	}
