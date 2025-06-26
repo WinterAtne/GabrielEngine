@@ -17,7 +17,7 @@ int rendering_initialize(
 		const float clear_color[4]);
 
 void rendering_process();
-int window_should_close();
+bool window_should_close();
 void window_close();
 
 // Creating

@@ -35,13 +35,17 @@ GLFWwindow* window;
 
 GLuint VAO=0, VBO=0, EBO=0;
 Shader shaders;
-GLuint modeLoc, viewLoc, tex0Uni;
-mat4 viewMatrix;
+GLuint model_uniform_location;
+GLuint camera_uniform_location;
+GLuint texture_unifrom_location;
+mat4 projMatrix, viewMatrix;
 
 InternalSprite* sprite_queue = NULL;
 int sprite_queue_cap = 0;
 
 /* ---- Fundemental Functions ---- */
+
+// TODO error callbacks could provide more information to user
 void glfw_error_callback(int error, const char* description) {
 	error(description);
 }
@@ -50,9 +54,10 @@ void GLAPIENTRY glad_error_callback(GLenum source, GLenum type, GLuint id, GLenu
 	error(message);
 }
 
+// Mega OpenGL initialization function
 int rendering_initialize(int window_x, int window_y, float window_scale, const char* window_name, const float clear_color[4]) {
+	// Rendering should only be intialized once
 	static bool rendering_initialized = false;
-	// Sprites should only be intialized once
 	if (rendering_initialized) {
 		error("Rendering already initialized");
 		return -1;
@@ -60,6 +65,7 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 		rendering_initialized = true;
 	}
 
+	/* ---- Begin OpenGL initialization --- */
 	if (!glfwInit()) {
 		error("glfw failled initialization")
 		return -1;
@@ -100,6 +106,7 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 		2, 1, 3,
 	};
 
+	/* ---- VAO, VBO, EBO | Sending data to GPU for quads --- */
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
@@ -122,47 +129,45 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	/* ---- Render Matricis ---- */
+	/* ---- Render Matricis & Uniforms ---- */
 	float window_aspect = (float)window_x/(float)window_y;
-	mat4 proj; glm_mat4_identity(proj);
+	glm_mat4_identity(projMatrix);
 	glm_ortho(
 				-window_aspect * window_scale, window_aspect * window_scale, // x
 				-window_scale, window_scale, // y
 				 0.0f, 1.0f, // Z
-				 proj); // Dest
-
-	int projLoc = glGetUniformLocation(shaders.program, "proj");
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, *proj);
+				 projMatrix); // Dest
 
 	glm_mat4_identity(viewMatrix);
-	viewLoc = glGetUniformLocation(shaders.program, "view");
+	camera_uniform_location = glGetUniformLocation(shaders.program, "camera");
 
-	modeLoc = glGetUniformLocation(shaders.program, "model");
+	model_uniform_location = glGetUniformLocation(shaders.program, "model");
 
-	/* Textures */
-	tex0Uni = glGetUniformLocation(shaders.program, "tex0");
+	texture_unifrom_location = glGetUniformLocation(shaders.program, "tex0");
 
-	return -1;
+	return 0;
 }
 
 /* ---- Private Functions ---- */
 void texture_bind(Texture texture) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.handle);
-	glUniform1i(tex0Uni, 0);
+	glUniform1i(texture_unifrom_location, 0);
 }
 
 // Assumes VAO is bound
 void sprite_render(InternalSprite* sprite) {
 	texture_bind(sprite->texture);
-	glUniformMatrix4fv(modeLoc, 1, GL_FALSE, *sprite->transform);
+	glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, *sprite->transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void sprites_draw() {
 	assert(VAO != 0);
 	glBindVertexArray(VAO);
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, *viewMatrix);
+	mat4 cameraMatrix;
+	glm_mul(projMatrix, viewMatrix, cameraMatrix);
+	glUniformMatrix4fv(camera_uniform_location, 1, GL_FALSE, *cameraMatrix);
 
 	for (int i = 0; i < sprite_queue_cap; i++) {
 		if (sprite_queue[i].ID == INVALID_SPRITE_ID) continue;
@@ -171,7 +176,7 @@ void sprites_draw() {
 }
 
 /* ---- Public Functions ---- */
-int window_should_close() {
+bool window_should_close() {
 	return glfwWindowShouldClose(window);
 }
 
