@@ -19,6 +19,7 @@ int engine_init(
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwSwapInterval(1); // Vsync = true
 
 	window = glfwCreateWindow(window_x, window_y, window_name, NULL, NULL);
 	if (window == NULL) {
