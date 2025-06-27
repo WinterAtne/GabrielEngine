@@ -8,56 +8,36 @@
 #include "utils.h"
 
 
-void shader_make(const char* vertexShaderName, const char* fragmentShaderName, Shader* shader) {
+int shader_make(const char* vertexShaderSource, const char* fragmentShaderSource, Shader* shader) {
 	GLint success;
 
-	const char* vertexShaderSource = file_read(vertexShaderName);
-	if (!vertexShaderSource) {
-		error("Vertex Shader could not be read");
-		free((void*)vertexShaderSource);
-		return;
-	}
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
-		free((void*)vertexShaderSource);
-
 		GLint maxLength = 0;
 		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
 		GLchar* log = malloc(maxLength * sizeof(GLchar));
 
 		glGetShaderInfoLog(vertexShader, maxLength, NULL, log);
 		printf("Vertex Shader Failed to Compile!\n> OpenGL Error: %s", log);
-		exit(-1);
+		return -1;
 	}
-	free((void*)vertexShaderSource);
-	vertexShaderSource = NULL;
 
-	const char* fragmentShaderSource = file_read(fragmentShaderName);
-	if (!fragmentShaderSource) {
-		error("Fragment Shader could not be read");
-		free((void*)fragmentShaderSource);
-		return;
-	}
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
-		free((void*)fragmentShaderSource);
-
 		GLint maxLength = 0;
 		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
 		GLchar* log = malloc(maxLength * sizeof(GLchar));
 
 		glGetShaderInfoLog(fragmentShader, maxLength, NULL, log);
 		printf("Fragment Shader Failed to Compile!\n> OpenGL Error: %s", log);
-		exit(-1);
+		return -1;
 	}
-	free((void*)fragmentShaderSource);
-	fragmentShaderSource = NULL;
 
 	shader->program = glCreateProgram();
 	glAttachShader(shader->program, vertexShader);
@@ -72,11 +52,12 @@ void shader_make(const char* vertexShaderName, const char* fragmentShaderName, S
 		glGetProgramInfoLog(shader->program, maxLength, &maxLength, log);
 		printf("Shader Failed to Link!\n> OpenGL Error: %s", log);
 		free(log);
-		exit(-1);
+		return -1;
 	}
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+	return 0;
 }
 
 void shader_activate(Shader* program) {
