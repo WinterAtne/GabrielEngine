@@ -25,8 +25,9 @@ int main() {
 		// camera_transform_translate((vec3){0.022f, 0.01f, 0.0});
 
 		Sprite s2 = sprite_make();
-		sprite_transform_translate(s2, (vec3){0.01f*i, 0.012f*i, 0.0f});
+		sprite_transform_translate(s2, (vec3){0.01f*i, 0.0002f*i*i, 0.0f});
 		sprite_transform_rotate(s2, 0.01f*i);
+		sprite_transform_scale(s2, (vec3){1.0f + 0.0001f*i*i, 1.0f, 1.0f});
 		sprite_texture_set(s2, tex1);
 
 		camera_transform_translate((vec3){-0.001f, 0.001f, 0.0f});
