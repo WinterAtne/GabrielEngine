@@ -6,6 +6,6 @@ typedef struct {
 	GLuint program;
 } Shader;
 
-void shader_make(const char* vertexShader, const char* fragmentShader, Shader* shader);
+int shader_make(const char* vertexShaderSource, const char* fragmentShaderSource, Shader* shader);
 void shader_activate(Shader* program);
 void shader_delete(Shader* program);

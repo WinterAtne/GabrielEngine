@@ -29,23 +29,36 @@ static const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
 static const int INVALID_SPRITE_ID = -1;
 static const int INITIAL_SPRITE_CAP = 16;
 static const float SPRITE_CAP_MULTIPLIER = 2.0f;
+static const int BUFFER_SWAP_INTERVAL = 1;
+
+// Quad
+static const GLfloat vertices[] = {
+	-0.5f,  0.5f,	0.0f, 0.0f, // Top Left
+	 0.5,   0.5f,	1.0f, 0.0f, // Top Right
+	-0.5f, -0.5f,	0.0f, 1.0f, // Bottom Left
+	 0.5f, -0.5f,	1.0f, 1.0f, // Bottom Right
+};
+
+static const GLuint indices[] = {
+	0, 1, 2,
+	2, 1, 3,
+};
 
 /* ---- Variables ---- */
 static GLFWwindow* window;
 
-static GLuint VAO=0, VBO=0, EBO=0;
 static Shader default_shaders;
 static GLuint model_uniform_location;
 static GLuint camera_uniform_location;
 static GLuint texture_unifrom_location;
 static mat4 projMatrix, viewMatrix;
+static GLuint global_vao;
 
 static InternalSprite* sprite_queue = NULL;
 static int sprite_queue_cap = 0;
 
-/* ---- Fundemental Functions ---- */
 
-// TODO error callbacks could provide more information to user
+/* ---- Private Functions ---- */
 static void glfw_error_callback(int error, const char* description) {
 	error(description);
 }
@@ -54,58 +67,9 @@ static void GLAPIENTRY glad_error_callback(GLenum source, GLenum type, GLuint id
 	error(message);
 }
 
-// Mega OpenGL initialization function
-int rendering_initialize(int window_x, int window_y, float window_scale, const char* window_name, const float clear_color[4]) {
-	// Rendering should only be intialized once
-	static bool rendering_initialized = false;
-	if (rendering_initialized) {
-		error("Rendering already initialized");
-		return -1;
-	} else {
-		rendering_initialized = true;
-	}
-
-	/* ---- Begin OpenGL initialization --- */
-	if (!glfwInit()) {
-		error("glfw failled initialization")
-		return -1;
-	}
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwSwapInterval(1); // Vsync = true
-
-	window = glfwCreateWindow(window_x, window_y, window_name, NULL, NULL);
-	if (window == NULL) {
-		error("Failled to initialize glfw")
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetErrorCallback(glfw_error_callback);
-	gladLoadGL();
-	glEnable(GL_DEBUG_OUTPUT);
-	glDebugMessageCallback(glad_error_callback, 0);
-	glViewport(0, 0, window_x, window_y);
-	glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
-
-	/* ---- Shaders ---- */
-	shader_make(VERTEX_SHADER_LOCATION, FRAGMENT_SHADER_LOCATION, &default_shaders);
-	shader_activate(&default_shaders);
-
-	/* ---- Quad ---- */
-	static const GLfloat vertices[] = {
-		-0.5f,  0.5f,	0.0f, 0.0f, // Top Left
-		 0.5,   0.5f,	1.0f, 0.0f, // Top Right
-		-0.5f, -0.5f,	0.0f, 1.0f, // Bottom Left
-		 0.5f, -0.5f,	1.0f, 1.0f, // Bottom Right
-	};
-
-	static const GLuint indices[] = {
-		0, 1, 2,
-		2, 1, 3,
-	};
-
+GLuint make_vao() {
+	GLuint VAO=0, VBO=0, EBO=0;
+	
 	/* ---- VAO, VBO, EBO | Sending data to GPU for quads --- */
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -129,26 +93,9 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	/* ---- Render Matricis & Uniforms ---- */
-	float window_aspect = (float)window_x/(float)window_y;
-	glm_mat4_identity(projMatrix);
-	glm_ortho(
-				-window_aspect * window_scale, window_aspect * window_scale, // x
-				-window_scale, window_scale, // y
-				 0.0f, 1.0f, // Z
-				 projMatrix); // Dest
-
-	glm_mat4_identity(viewMatrix);
-	camera_uniform_location = glGetUniformLocation(default_shaders.program, "camera");
-
-	model_uniform_location = glGetUniformLocation(default_shaders.program, "model");
-
-	texture_unifrom_location = glGetUniformLocation(default_shaders.program, "tex0");
-
-	return 0;
+	return VAO;
 }
 
-/* ---- Private Functions ---- */
 static void texture_bind(Texture texture) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture.handle);
@@ -163,8 +110,8 @@ static void sprite_render(InternalSprite* sprite) {
 }
 
 static void sprites_draw() {
-	assert(VAO != 0);
-	glBindVertexArray(VAO);
+	assert(global_vao != 0);
+	glBindVertexArray(global_vao);
 
 	mat4 cameraMatrix;
 	glm_mul(projMatrix, viewMatrix, cameraMatrix);
@@ -177,6 +124,71 @@ static void sprites_draw() {
 }
 
 /* ---- Public Functions ---- */
+// Mega OpenGL initialization function
+int rendering_initialize(int window_x, int window_y, float window_scale, const char* window_name, const float clear_color[4]) {
+	// Rendering should only be intialized once
+	static bool rendering_initialized = false;
+	if (rendering_initialized) {
+		error("Rendering already initialized");
+		return -1;
+	} else {
+		rendering_initialized = true;
+	}
+
+	/* ---- Begin OpenGL initialization --- */
+	int err = 0;
+
+	if (!glfwInit()) {
+		error("glfw failled initialization")
+		return -1;
+	}
+	glfwSetErrorCallback(glfw_error_callback);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	window = glfwCreateWindow(window_x, window_y, window_name, NULL, NULL);
+	if (window == NULL) {
+		error("Failled to initialize glfw")
+		glfwTerminate();
+		return -1;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSwapInterval(BUFFER_SWAP_INTERVAL); // Vsync = true
+	gladLoadGL();
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(glad_error_callback, 0);
+	glViewport(0, 0, window_x, window_y);
+	glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
+
+	/* ---- Shaders ---- */
+	const char* vertexShaderSource = file_read(VERTEX_SHADER_LOCATION);
+	const char* fragmentShaderSource = file_read(FRAGMENT_SHADER_LOCATION);
+	err = shader_make(vertexShaderSource, fragmentShaderSource, &default_shaders);
+	if (err) { error("Shader initialization failled"); return err; }
+	shader_activate(&default_shaders);
+	free((char*)vertexShaderSource); vertexShaderSource = NULL;
+	free((char*)fragmentShaderSource); fragmentShaderSource = NULL;
+
+	/* ---- VAO ---- */
+	global_vao = make_vao();
+
+	/* ---- Render Matricis & Uniforms ---- */
+	float window_aspect = (float)window_x/(float)window_y;
+	glm_mat4_identity(projMatrix);
+	glm_ortho(
+				-window_aspect * window_scale, window_aspect * window_scale, // x
+				-window_scale, window_scale, // y
+				 0.0f, 1.0f, // Z
+				 projMatrix); // Dest
+	glm_mat4_identity(viewMatrix);
+
+	camera_uniform_location = glGetUniformLocation(default_shaders.program, "camera");
+	model_uniform_location = glGetUniformLocation(default_shaders.program, "model");
+	texture_unifrom_location = glGetUniformLocation(default_shaders.program, "tex0");
+
+	return 0;
+}
 bool window_should_close() {
 	return glfwWindowShouldClose(window);
 }
