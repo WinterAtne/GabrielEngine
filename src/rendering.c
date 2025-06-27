@@ -22,6 +22,10 @@ typedef struct {
 	// Layer
 } InternalSprite;
 
+typedef struct {
+	GLuint VAO, VBO, EBO;
+} Quad;
+
 /* ---- Constants ---- */
 static const char* VERTEX_SHADER_LOCATION = "resources/shaders/default.vert";
 static const char* FRAGMENT_SHADER_LOCATION = "resources/shaders/default.frag";
@@ -52,7 +56,7 @@ static GLuint model_uniform_location;
 static GLuint camera_uniform_location;
 static GLuint texture_unifrom_location;
 static mat4 projMatrix, viewMatrix;
-static GLuint global_vao;
+static Quad global_quad;
 
 static InternalSprite* sprite_queue = NULL;
 static int sprite_queue_cap = 0;
@@ -67,7 +71,7 @@ static void GLAPIENTRY glad_error_callback(GLenum source, GLenum type, GLuint id
 	error(message);
 }
 
-GLuint make_vao() {
+Quad make_quad() {
 	GLuint VAO=0, VBO=0, EBO=0;
 	
 	/* ---- VAO, VBO, EBO | Sending data to GPU for quads --- */
@@ -93,7 +97,12 @@ GLuint make_vao() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	return VAO;
+	Quad quad;
+	quad.VAO = VAO;
+	quad.VBO = VBO;
+	quad.EBO = EBO;
+
+	return quad;
 }
 
 static void texture_bind(Texture texture) {
@@ -110,8 +119,8 @@ static void sprite_render(InternalSprite* sprite) {
 }
 
 static void sprites_draw() {
-	assert(global_vao != 0);
-	glBindVertexArray(global_vao);
+	assert(global_quad.VAO != 0);
+	glBindVertexArray(global_quad.VAO);
 
 	mat4 cameraMatrix;
 	glm_mul(projMatrix, viewMatrix, cameraMatrix);
@@ -165,13 +174,14 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 	const char* vertexShaderSource = file_read(VERTEX_SHADER_LOCATION);
 	const char* fragmentShaderSource = file_read(FRAGMENT_SHADER_LOCATION);
 	err = shader_make(vertexShaderSource, fragmentShaderSource, &default_shaders);
-	if (err) { error("Shader initialization failled"); return err; }
-	shader_activate(&default_shaders);
 	free((char*)vertexShaderSource); vertexShaderSource = NULL;
 	free((char*)fragmentShaderSource); fragmentShaderSource = NULL;
+	if (err) { error("Shader initialization failled"); return err; }
+
+	shader_activate(&default_shaders);
 
 	/* ---- VAO ---- */
-	global_vao = make_vao();
+	global_quad = make_quad();
 
 	/* ---- Render Matricis & Uniforms ---- */
 	float window_aspect = (float)window_x/(float)window_y;
@@ -189,6 +199,7 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 
 	return 0;
 }
+
 bool window_should_close() {
 	return glfwWindowShouldClose(window);
 }

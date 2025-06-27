@@ -50,7 +50,7 @@ $(EXE): $(OBJ) $(MAIN_FILE_OUT)
 $(RESOURCES_DIR):
 	cp -ru $(RESOURCES_DIR) $(BIN_DIR)
 
-run: all
+run: default
 	./$(EXE)
 
 $(SLIB): $(OBJ)
