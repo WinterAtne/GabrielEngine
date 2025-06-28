@@ -4,11 +4,12 @@ layout (location = 1) in vec2 aTexCoord;
 
 uniform mat4 model;
 uniform mat4 camera;
+// uniform float layer;
 
 out vec2 TexCoord;
 
 void main()
 {
 	TexCoord = aTexCoord;
-	gl_Position = camera * model * vec4(aPos, 0.0, 1.0);
+	gl_Position = camera * model * vec4(aPos, 1.0, 1.0);
 }

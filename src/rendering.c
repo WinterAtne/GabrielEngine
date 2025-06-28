@@ -169,6 +169,8 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 	glDebugMessageCallback(glad_error_callback, 0);
 	glViewport(0, 0, window_x, window_y);
 	glClearColor(clear_color[0], clear_color[1], clear_color[2], clear_color[3]);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
 	/* ---- Shaders ---- */
 	const char* vertexShaderSource = file_read(VERTEX_SHADER_LOCATION);
@@ -189,7 +191,7 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 	glm_ortho(
 				-window_aspect * window_scale, window_aspect * window_scale, // x
 				-window_scale, window_scale, // y
-				 0.0f, 1.0f, // Z
+				-1024.0f, 0.0f, // Z
 				 projMatrix); // Dest
 	glm_mat4_identity(viewMatrix);
 
@@ -210,7 +212,7 @@ void window_close() {
 }
 
 void rendering_process() {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	sprites_draw();
 
@@ -252,34 +254,34 @@ Sprite sprite_make() {
 }
 
 void sprite_free(Sprite sprite) {
-	if (sprite >= sprite_queue_cap) {
+	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
 		error("Attempted to modify out of bounds sprite");
 	}
 	sprite_queue[sprite].ID = INVALID_SPRITE_ID;
 }
 
 void sprite_texture_set(Sprite sprite, Texture texture) {
-	if (sprite >= sprite_queue_cap) {
+	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
 		error("Attempted to modify out of bounds sprite");
 	}
 	sprite_queue[sprite].texture = texture;
 }
 
-void sprite_transform_translate(Sprite sprite, vec3 translation) {
-	if (sprite >= sprite_queue_cap) {
+void sprite_translate(Sprite sprite, vec3 translation) {
+	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
 		error("Attempted to modify out of bounds sprite");
 	}
 	glm_translated(sprite_queue[sprite].transform, translation);
 }
 
-void sprite_transform_rotate(Sprite sprite, float rotation) {
-	if (sprite >= sprite_queue_cap) {
+void sprite_rotate(Sprite sprite, float rotation) {
+	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
 		error("Attempted to modify out of bounds sprite");
 	}
 	glm_spinned(sprite_queue[sprite].transform, rotation, (vec3){0.0f, 0.0f, 1.0f});
 }
 
-void sprite_transform_scale(Sprite sprite, vec3 scale) {
+void sprite_scale(Sprite sprite, vec3 scale) {
 	if (sprite >= sprite_queue_cap) {
 		error("Attempted to modify out of bounds sprite");
 	}

@@ -30,6 +30,6 @@ void camera_transform_translate(vec3 translation);
 
 // Modifying
 void sprite_texture_set(Sprite sprite, Texture texture);
-void sprite_transform_translate(Sprite sprite, vec3 translation);
-void sprite_transform_rotate(Sprite sprite, float rotation);
-void sprite_transform_scale(Sprite sprite, vec3 scale);
+void sprite_translate(Sprite sprite, vec3 translation);
+void sprite_rotate(Sprite sprite, float rotation);
+void sprite_scale(Sprite sprite, vec3 scale);
