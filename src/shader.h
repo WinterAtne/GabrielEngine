@@ -1,9 +1,7 @@
 #pragma once
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 
 typedef struct {
-	GLuint program;
+	unsigned int program;
 } Shader;
 
 int shader_make(const char* vertexShaderSource, const char* fragmentShaderSource, Shader* shader);
