@@ -17,7 +17,7 @@ int main() {
 	// Main Loop
 	char i = 0;
 	while(!window_should_close()) {
-sprite_scale(s0, (vec2){0.999f, 1.0011f});
+		sprite_scale(s0, (vec2){0.999f, 1.0011f});
 		sprite_rotate(s0, 0.001f);
 		sprite_translate(s0, (vec2){0.0001f, -0.0001f});
 		camera_transform_translate((vec2){0.0022f, 0.001f});
