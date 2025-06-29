@@ -1,8 +1,10 @@
 #include "rendering.h"
 
+#include <cglm/mat4.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
+#include <cglm/io.h>
 #include <stb_image.h>
 
 #include <string.h>
@@ -16,10 +18,7 @@
 // ID is its index in the sprite_queue
 typedef struct {
 	Sprite ID;
-	float layer;
-	vec2 position;
-	vec2 scale;
-	float rotation;
+	Transform transform;
 	Texture texture; // Probably make this a pointer
 	// Color data
 } InternalSprite;
@@ -115,17 +114,11 @@ static void texture_bind(Texture texture) {
 }
 
 // Assumes VAO is bound
-inline static void transform_make(InternalSprite* sprite, mat4 transform) {
-	glm_mat4_identity(transform);
-	glm_translated(transform, (vec3){sprite->position[0], sprite->position[1], sprite->layer});
-	glm_spinned(transform, sprite->rotation, (vec3){0.0f, 0.0f, 1.0f});
-	glm_scale(transform, (vec3){sprite->scale[0], sprite->scale[1], 1.0f});
-}
-
 static void sprite_render(InternalSprite* sprite) {
 	texture_bind(sprite->texture);
 	mat4 transform;
-	transform_make(sprite, transform);
+	transform_matrix(&sprite->transform, &transform);
+
 	glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, *transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -258,12 +251,7 @@ Sprite sprite_make() {
 
 	for (int i = sprite_queue_cap_old; i < sprite_queue_cap; i++) {
 		sprite_queue[i].ID = INVALID_SPRITE_ID;
-		sprite_queue[i].position[0] = 0;
-		sprite_queue[i].position[1] = 0;
-		sprite_queue[i].scale[0] = 1;
-		sprite_queue[i].scale[1] = 1;
-		sprite_queue[i].rotation = 0;
-		sprite_queue[i].layer = 0;
+		transform_zero(&sprite_queue[i].transform);
 	}
 
 	return sprite_make(); // If it works its not a bad idea
@@ -291,38 +279,12 @@ void camera_transform_translate(vec2 translation) {
 	camera_position[1] += translation[1];
 }
 
-void sprite_translate(Sprite sprite, vec2 translation) {
-	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
-		error("Attempted to modify out of bounds sprite");
-		return;
-	}
-	sprite_queue[sprite].position[0] += translation[0];
-	sprite_queue[sprite].position[1] += translation[1];
+void sprite_transform_get(Sprite sprite, Transform* transform) {
+	memcpy(transform, &sprite_queue[sprite].transform, sizeof(Transform));
 }
 
-void sprite_set_layer(Sprite sprite, float layer) {
-	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
-		error("Attempted to modify out of bounds sprite");
-		return;
-	}
-	sprite_queue[sprite].layer = layer;
-}
-
-void sprite_rotate(Sprite sprite, float rotation) {
-	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
-		error("Attempted to modify out of bounds sprite");
-		return;
-	}
-	sprite_queue[sprite].rotation += rotation;
-}
-
-void sprite_scale(Sprite sprite, vec3 scale) {
-	if (sprite >= sprite_queue_cap) {
-		error("Attempted to modify out of bounds sprite");
-		return;
-	}
-	sprite_queue[sprite].scale[0] *= scale[0];
-	sprite_queue[sprite].scale[1] *= scale[1];
+void sprite_transform_set(Sprite sprite, Transform* transform) {
+	memcpy(&sprite_queue[sprite].transform, transform, sizeof(Transform));
 }
 
 /* -- Textures -- */

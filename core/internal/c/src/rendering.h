@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <cglm/types.h>
 
+#include "transform.h"
+
 
 typedef int Sprite;
 
@@ -31,7 +33,5 @@ void camera_transform_translate(vec3 translation);
 
 // Modifying
 void sprite_texture_set(Sprite sprite, Texture texture);
-void sprite_translate(Sprite sprite, vec3 translation);
-void sprite_set_layer(Sprite sprite, float layer);
-void sprite_rotate(Sprite sprite, float rotation);
-void sprite_scale(Sprite sprite, vec3 scale);
+void sprite_transform_get(Sprite sprite, Transform* transform);
+void sprite_transform_set(Sprite sprite, Transform* transform);
