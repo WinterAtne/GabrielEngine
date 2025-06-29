@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <cglm//io.h>
+#include <cglm/cglm.h>
 #include <stb_image.h>
 
 #include <string.h>
@@ -16,10 +16,12 @@
 // ID is its index in the sprite_queue
 typedef struct {
 	Sprite ID;
-	mat4 transform;  // Probably make this a pointer
+	float layer;
+	vec2 position;
+	vec2 scale;
+	float rotation;
 	Texture texture; // Probably make this a pointer
 	// Color data
-	// Layer
 } InternalSprite;
 
 typedef struct {
@@ -55,7 +57,8 @@ static Shader default_shaders;
 static GLuint model_uniform_location;
 static GLuint camera_uniform_location;
 static GLuint texture_unifrom_location;
-static mat4 projMatrix, viewMatrix;
+static mat4 projMatrix;
+static vec2 camera_position = {0.0f, 0.0f};
 static Quad global_quad;
 
 static InternalSprite* sprite_queue = NULL;
@@ -112,9 +115,18 @@ static void texture_bind(Texture texture) {
 }
 
 // Assumes VAO is bound
+inline static void transform_make(InternalSprite* sprite, mat4 transform) {
+	glm_mat4_identity(transform);
+	glm_translated(transform, (vec3){sprite->position[0], sprite->position[1], sprite->layer});
+	glm_spinned(transform, sprite->rotation, (vec3){0.0f, 0.0f, 1.0f});
+	glm_scale(transform, (vec3){sprite->scale[0], sprite->scale[1], 1.0f});
+}
+
 static void sprite_render(InternalSprite* sprite) {
 	texture_bind(sprite->texture);
-	glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, *sprite->transform);
+	mat4 transform;
+	transform_make(sprite, transform);
+	glUniformMatrix4fv(model_uniform_location, 1, GL_FALSE, *transform);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -122,10 +134,14 @@ static void sprites_draw() {
 	assert(global_quad.VAO != 0);
 	glBindVertexArray(global_quad.VAO);
 
+	mat4 viewMatrix; glm_mat4_identity(viewMatrix);
+	glm_translate(viewMatrix, (vec3){camera_position[0], camera_position[1], 0.0f});
+
 	mat4 cameraMatrix;
 	glm_mul(projMatrix, viewMatrix, cameraMatrix);
 	glUniformMatrix4fv(camera_uniform_location, 1, GL_FALSE, *cameraMatrix);
 
+	shader_activate(&default_shaders);
 	for (int i = 0; i < sprite_queue_cap; i++) {
 		if (sprite_queue[i].ID == INVALID_SPRITE_ID) continue;
 		sprite_render(&sprite_queue[i]);
@@ -193,7 +209,6 @@ int rendering_initialize(int window_x, int window_y, float window_scale, const c
 				-window_scale, window_scale, // y
 				-1024.0f, 0.0f, // Z
 				 projMatrix); // Dest
-	glm_mat4_identity(viewMatrix);
 
 	camera_uniform_location = glGetUniformLocation(default_shaders.program, "camera");
 	model_uniform_location = glGetUniformLocation(default_shaders.program, "model");
@@ -220,10 +235,6 @@ void rendering_process() {
 	glfwSwapBuffers(window);
 }
 
-void camera_transform_translate(vec3 translation) {
-	glm_vec3_negate(translation);
-	glm_translated(viewMatrix, translation);
-}
 
 Sprite sprite_make() {
 	for (int i = 0; i < sprite_queue_cap; i++) {
@@ -247,7 +258,12 @@ Sprite sprite_make() {
 
 	for (int i = sprite_queue_cap_old; i < sprite_queue_cap; i++) {
 		sprite_queue[i].ID = INVALID_SPRITE_ID;
-		glm_mat4_identity(sprite_queue[i].transform);
+		sprite_queue[i].position[0] = 0;
+		sprite_queue[i].position[1] = 0;
+		sprite_queue[i].scale[0] = 1;
+		sprite_queue[i].scale[1] = 1;
+		sprite_queue[i].rotation = 0;
+		sprite_queue[i].layer = 0;
 	}
 
 	return sprite_make(); // If it works its not a bad idea
@@ -263,32 +279,53 @@ void sprite_free(Sprite sprite) {
 void sprite_texture_set(Sprite sprite, Texture texture) {
 	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
 		error("Attempted to modify out of bounds sprite");
+		return;
 	}
 	sprite_queue[sprite].texture = texture;
 }
 
-void sprite_translate(Sprite sprite, vec3 translation) {
+/* -- Mathy Stuff --- */
+void camera_transform_translate(vec2 translation) {
+	glm_vec2_negate(translation);
+	camera_position[0] += translation[0];
+	camera_position[1] += translation[1];
+}
+
+void sprite_translate(Sprite sprite, vec2 translation) {
 	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
 		error("Attempted to modify out of bounds sprite");
+		return;
 	}
-	glm_translated(sprite_queue[sprite].transform, translation);
+	sprite_queue[sprite].position[0] += translation[0];
+	sprite_queue[sprite].position[1] += translation[1];
+}
+
+void sprite_set_layer(Sprite sprite, float layer) {
+	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
+		error("Attempted to modify out of bounds sprite");
+		return;
+	}
+	sprite_queue[sprite].layer = layer;
 }
 
 void sprite_rotate(Sprite sprite, float rotation) {
 	if (sprite >= sprite_queue_cap && sprite_queue[sprite].ID == sprite) {
 		error("Attempted to modify out of bounds sprite");
+		return;
 	}
-	glm_spinned(sprite_queue[sprite].transform, rotation, (vec3){0.0f, 0.0f, 1.0f});
+	sprite_queue[sprite].rotation += rotation;
 }
 
 void sprite_scale(Sprite sprite, vec3 scale) {
 	if (sprite >= sprite_queue_cap) {
 		error("Attempted to modify out of bounds sprite");
+		return;
 	}
-	glm_scale(sprite_queue[sprite].transform, scale);
+	sprite_queue[sprite].scale[0] *= scale[0];
+	sprite_queue[sprite].scale[1] *= scale[1];
 }
 
-// Textures
+/* -- Textures -- */
 Texture texture_make(const char* texture_location) {
 	Texture texture;
 

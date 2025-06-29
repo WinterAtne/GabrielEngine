@@ -1,12 +1,13 @@
 #pragma once
-#include <glad/glad.h>
-#include <cglm/cglm.h>
+#include <stdbool.h>
+#include <cglm/types.h>
 
-typedef struct {
-	GLuint handle;
-} Texture;
 
 typedef int Sprite;
+
+typedef struct {
+	unsigned int handle;
+} Texture;
 
 // Initializing and Processing
 int rendering_initialize(
@@ -31,5 +32,6 @@ void camera_transform_translate(vec3 translation);
 // Modifying
 void sprite_texture_set(Sprite sprite, Texture texture);
 void sprite_translate(Sprite sprite, vec3 translation);
+void sprite_set_layer(Sprite sprite, float layer);
 void sprite_rotate(Sprite sprite, float rotation);
 void sprite_scale(Sprite sprite, vec3 scale);
