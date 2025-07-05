@@ -9,7 +9,7 @@ SUB_MAKE := core/CCore
 SUB_MAKE_CLEAN := $(addsuffix clean, $(SUB_MAKE))
 
 .PHONY: all
-all: run $(SUB_MAKE)
+all: $(SUB_MAKE) run
 
 run:
 	$(GO) run .
