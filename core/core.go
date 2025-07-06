@@ -104,12 +104,13 @@ func CallOnRenderThead(call func()) {
 	funcQueue <- call
 }
 
-// Signals to the Render Thread that no more functions will be put in the call queue.
-// Blocks thread until next frame
+// Signals to the Render Thread that no more functions will be put in the call queue until the next frame.
+// It is recomended to block the thread using BlockTillNextFrame soon after calling this.
 func FinishFrame() {
 	finishFrame <- true
 }
 
+// TODO can only be used by one thread at a time
 // Blocks the current thread until the render thread has started the next frame.
 // If a value of false is returned, the Render Thread has ended, and so calling
 // this function again will block the thread permanently
