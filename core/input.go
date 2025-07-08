@@ -6,5 +6,6 @@ package core
 import "C"
 
 func IsKeyPressed(key int) bool {
+
 	return bool(C.IsKeyPressed(C.int(key)))
 }
