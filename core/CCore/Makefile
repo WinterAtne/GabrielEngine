@@ -8,7 +8,9 @@ VERSION := 0.0.0
 SHELL = /bin/sh
 CC = clang
 CLIB := -ldl -lglfw -lm
-CFLAGS := -fsanitize=address -g -O0 -Wall
+CFLAGS := -Wall
+# Uncomment for debug
+#CFLAGS := -fsanitize=address -g -O0 -Wall
 
 # Directories & Files
 OBJ_DIR := obj

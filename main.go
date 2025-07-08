@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/WinterAtne/Engine/core"
 )
@@ -41,23 +40,18 @@ func main() {
 	}
 
 	i := 0
-	for true {
-		t := time.Now()
-		tra.Rotation+= 0.01
-		tra.ScaleX+= 0.001
-		tra1.Rotation-= 0.02
-		tra2.PositionX+= 0.001
-		tra2.Rotation+= 0.001
+	finish := true
+	for finish {
+		tra.Rotation = float32(i) * 0.01
 		core.QueueSprite(&tra, &tex)
 		core.QueueSprite(&tra1, &tex)
 		core.QueueSprite(&tra2, &tex0)
 		core.FinishFrame()
-		core.BlockTillNextFrame()
-		i++
-		if i % 60 == 0 {
-			dif := time.Since(t)
-			fmt.Println(dif)
-			// break
+		finish = core.BlockTillNextFrame()
+		if (core.IsKeyPressed('K')) {
+			fmt.Println("Hi")
+			i++
 		}
+		fmt.Println("Bye")
 	}
 }

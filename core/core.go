@@ -51,9 +51,9 @@ func Start() {
 	
 	renderLoop()
 
-	C.DestroyWindow()
 	_=<-finishFrame
 	frameStart <- false
+	C.DestroyWindow()
 	}()
 }
 
