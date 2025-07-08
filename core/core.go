@@ -23,7 +23,7 @@ import (
 )
 
 /* --- Constants --- */
-const frameQueueWidth int = 32
+const frameQueueWidth int = 1024
 
 /* --- Package Globals --- */
 
@@ -32,19 +32,13 @@ var funcQueue chan func() = make(chan func(), frameQueueWidth)
 /* --- Local --- */
 // A signal that the no more functions will be put on to the 
 var finishFrame chan bool = make(chan bool)
-// A signal that the program should finish and close.
-var finishProgram chan bool = make(chan bool)
 
 var frameStart chan bool = make(chan bool)
-
-var isProcessing bool = false
 
 // Beings the asynchronus render goroutine loop.
 func Start() {
 	// This entire function must run asynchronusly to avoid blocking or locking the main goroutine.
 	go func() {	
-	isProcessing = true
-
 	runtime.LockOSThread()
 	c_err := C.InitWindow();
 	if (c_err != 0) {
@@ -55,12 +49,19 @@ func Start() {
 		panic("Failled to init window")
 	}
 	
-	var shouldBreak bool = false
-	for (!bool(C.ShouldDestroyWindow()) && !shouldBreak) {
+	renderLoop()
 
+	C.DestroyWindow()
+	_=<-finishFrame
+	frameStart <- false
+	}()
+}
+
+func renderLoop() {
+	for (!bool(C.ShouldDestroyWindow())) {
 		finishFrameValue := false
 
-		for !finishFrameValue || (len(funcQueue) != 0) && !shouldBreak {
+		for ((len(funcQueue) != 0) || !finishFrameValue) {
 			select {
 			case f:=(<-funcQueue):
 				f()
@@ -72,32 +73,21 @@ func Start() {
 		C.DrawSpriteQueue()
 		C.ProcessWindow()
 
-		select {
-		case shouldBreak=(<-finishProgram):
-		default:	
-		}
-		if shouldBreak {
-			break
-		} else {
-			frameStart <- true
-		}
+		frameStart<-true
 	}
-
-	C.DestroyWindow()
-	_=<-finishFrame
-	frameStart <- false
-	}()
 }
 
 /* 
-Queues a function to be called on the render thread.
-Other functions can be wrapped using anonymus functions.
+Queues a function to be called on the render thread. Guarentees order of execution.
+
+Other functions can be wrapped using anonymus functions:
 
 	rtrn := make(chan int)
 	CallOnRenderThead(func() {
 		rtrn<-SomeOtherFunction(arg1, arg2, arg3)
 	})
 	value := <-return
+	close(rtrn)
 
 */
 func CallOnRenderThead(call func()) {
@@ -106,6 +96,7 @@ func CallOnRenderThead(call func()) {
 
 // Signals to the Render Thread that no more functions will be put in the call queue until the next frame.
 // It is recomended to block the thread using BlockTillNextFrame soon after calling this.
+// Should not be called more than once per frame.
 func FinishFrame() {
 	finishFrame <- true
 }
@@ -115,18 +106,14 @@ func FinishFrame() {
 // If a value of false is returned, the Render Thread has ended, and so calling
 // this function again will block the thread permanently
 func BlockTillNextFrame() bool {
-	value:=<-frameStart
-
-	return value
+	return <-frameStart
 }
 
 // Signals to the Render Thread to close the window after the current frame.
 // Attempting further calls to this package is undefined behavior.
 func Finish() {
-
 	CallOnRenderThead(func() {
 		C.DestroyWindow()
 	})
-
 }
 

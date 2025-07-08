@@ -13,6 +13,10 @@ func main() {
 	var texChan chan core.Texture = make(chan core.Texture)
 	core.NewTexture("resources/textures/test_text.png", texChan)
 	tex:=<-texChan
+	core.NewTexture("resources/textures/test_text_1.jpg", texChan)
+	tex0:=<-texChan
+	close(texChan)
+
 	var tra core.Transform = core.Transform{
 		PositionX: 0,
 		PositionY: 0,
@@ -37,8 +41,7 @@ func main() {
 	}
 
 	i := 0
-	var keepGoing bool = true
-	for keepGoing {
+	for true {
 		t := time.Now()
 		tra.Rotation+= 0.01
 		tra.ScaleX+= 0.001
@@ -47,13 +50,14 @@ func main() {
 		tra2.Rotation+= 0.001
 		core.QueueSprite(&tra, &tex)
 		core.QueueSprite(&tra1, &tex)
-		core.QueueSprite(&tra2, &tex)
+		core.QueueSprite(&tra2, &tex0)
 		core.FinishFrame()
-		keepGoing = core.BlockTillNextFrame()
+		core.BlockTillNextFrame()
 		i++
 		if i % 60 == 0 {
 			dif := time.Since(t)
 			fmt.Println(dif)
+			// break
 		}
 	}
 }
