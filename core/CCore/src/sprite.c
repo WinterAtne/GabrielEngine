@@ -60,7 +60,7 @@ static GLuint VAO = 0, VBO = 0, EBO = 0;
 static GLuint uCameraLocation = 0;
 static GLuint uModelLocation = 0;
 static GLuint uTextureLocation = 0;
-static vec2 cameraPosition = {};
+static vec3 cameraPosition = {0, 0, 0};
 
 static mat4 projectionMatrix = {};
 

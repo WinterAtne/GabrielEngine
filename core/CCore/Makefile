@@ -7,7 +7,8 @@ VERSION := 0.0.0
 # Variables
 SHELL = /bin/sh
 CC = clang
-CLIB = -ldl -lglfw -lm
+CLIB := -ldl -lglfw -lm
+CFLAGS := -fsanitize=address -g -O0 -Wall
 
 # Directories & Files
 OBJ_DIR := obj
@@ -40,10 +41,10 @@ lib: $(SLIB)
 all: $(EXE) lib
 
 $(OBJ_DIR)/%.o: %.c
-	$(CC) $(INC) -c $< -o $@
+	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
 $(EXE): $(OBJ) $(MAIN_FILE_OUT)
-	$(CC) $(CLIB) $(INC) $(OBJ) $(MAIN_FILE_OUT) -o $@
+	$(CC) $(CLIB) $(CFLAGS) $(INC) $(OBJ) $(MAIN_FILE_OUT) -o $@
 
 run: default
 	./$(EXE)
