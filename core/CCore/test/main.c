@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "input.h"
 #include "sprite.h"
 #include "texture.h"
 #include "window.h"
@@ -25,7 +26,9 @@ int main() {
 		DrawSpriteQueue();
 		ProcessWindow();
 
-		i++;
+		if (IsKeyPressed('K')) {
+			i++;
+		}
 	}
 
 	DestroyWindow();
