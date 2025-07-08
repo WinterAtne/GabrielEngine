@@ -30,7 +30,7 @@ const frameQueueWidth int = 1024
 // A package global for sending functions to be run on the render thread.
 var funcQueue chan func() = make(chan func(), frameQueueWidth)
 /* --- Local --- */
-// A signal that the no more functions will be put on to the 
+// A signal that the no more functions will be put in the queue.
 var finishFrame chan bool = make(chan bool)
 
 var frameStart chan bool = make(chan bool)
@@ -39,7 +39,7 @@ var frameStart chan bool = make(chan bool)
 func Start() {
 	// This entire function must run asynchronusly to avoid blocking or locking the main goroutine.
 	go func() {	
-	runtime.LockOSThread()
+	runtime.LockOSThread() // OpenGL throws a fit when you change the thread
 	c_err := C.InitWindow();
 	if (c_err != 0) {
 		panic("Failled to init window")
