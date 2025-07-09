@@ -19,6 +19,7 @@ package core
 // #include "CCore/src/sprite.h"
 import "C"
 import (
+	"fmt"
 	"runtime"
 )
 
@@ -36,7 +37,9 @@ var finishFrame chan bool = make(chan bool)
 var frameStart chan bool = make(chan bool)
 
 // Beings the asynchronus render goroutine loop.
-func Start() {
+func Start() bool {
+	fmt.Println("bye")
+	initFinish := make(chan bool)
 	// This entire function must run asynchronusly to avoid blocking or locking the main goroutine.
 	go func() {	
 	runtime.LockOSThread() // OpenGL throws a fit when you change the thread
@@ -48,6 +51,10 @@ func Start() {
 	if (c_err != 0) {
 		panic("Failled to init window")
 	}
+	fmt.Println("sia")
+	loadTextures()
+
+	initFinish <- true // Initialization over
 	
 	renderLoop()
 
@@ -55,6 +62,8 @@ func Start() {
 	frameStart <- false
 	C.DestroyWindow()
 	}()
+
+	return <-initFinish
 }
 
 func renderLoop() {

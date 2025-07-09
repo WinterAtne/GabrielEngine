@@ -1,20 +1,15 @@
 package main
 
 import (
-	"fmt"
 
 	"github.com/WinterAtne/Engine/core"
 )
 
 func main() {
 	core.Start()
-	
-	var texChan chan core.Texture = make(chan core.Texture)
-	core.NewTexture("resources/textures/test_text.png", texChan)
-	tex:=<-texChan
-	core.NewTexture("resources/textures/test_text_1.jpg", texChan)
-	tex0:=<-texChan
-	close(texChan)
+
+	tex := core.GetTexture("test_text.png")
+	tex0 := core.GetTexture("test_text_1.jpg")
 
 	var tra core.Transform = core.Transform{
 		PositionX: 0,
@@ -49,9 +44,7 @@ func main() {
 		core.FinishFrame()
 		finish = core.BlockTillNextFrame()
 		if (core.IsKeyPressed('K')) {
-			fmt.Println("Hi")
 			i++
 		}
-		fmt.Println("Bye")
 	}
 }

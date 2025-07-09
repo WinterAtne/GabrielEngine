@@ -8,6 +8,8 @@ package core
 import "C"
 
 import (
+	"fmt"
+	"os"
 	"unsafe"
 )
 
@@ -15,15 +17,31 @@ type Texture struct {
 	id uint32	
 }
 
-func NewTexture(location string, rtrn chan<- Texture) {
-	CallOnRenderThead(func() {
-		var tex Texture
-		loc := C.CString(location)
-		tex.id = uint32(C.NewTexture(loc))
-		defer C.free(unsafe.Pointer(loc))
+var textures map[string]Texture = make(map[string]Texture)
 
-		rtrn <- tex
-	})
+func loadTextures() {
+	const texturesDir string = "resources/textures/"
+
+	files, err := os.ReadDir(texturesDir)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() { continue }
+
+		fmt.Println(file.Name())
+
+		var tex Texture
+		location := C.CString(texturesDir + file.Name())
+		defer C.free(unsafe.Pointer(location))
+		tex.id = uint32(C.NewTexture(location))
+		textures[file.Name()] = tex
+	}
+}
+
+func GetTexture(name string) Texture {
+	return textures[name]
 }
 
 func (texture *Texture) GetID() uint32 {
