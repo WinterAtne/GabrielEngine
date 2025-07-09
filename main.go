@@ -3,48 +3,28 @@ package main
 import (
 
 	"github.com/WinterAtne/Engine/core"
+	"github.com/WinterAtne/Engine/tree"
 )
 
 func main() {
 	core.Start()
 
 	tex := core.GetTexture("test_text.png")
-	tex0 := core.GetTexture("test_text_1.jpg")
+	// tex0 := core.GetTexture("test_text_1.jpg")
 
-	var tra core.Transform = core.Transform{
-		PositionX: 0,
-		PositionY: 0,
-		Layer: 1,
-		ScaleX: 1,
-		ScaleY: 1,
-	}
+	sprite := tree.NewNode(&tree.Sprite{
+		Texture: &tex,
+	}, "sprite_0")
 
-	var tra1 core.Transform = core.Transform{
-		PositionX: 0.5,
-		PositionY: 0.5,
-		Layer: 0,
-		ScaleX: 1,
-		ScaleY: 1,
-	}
-	var tra2 core.Transform = core.Transform{
-		PositionX: 0.5,
-		PositionY: -0.5,
-		Layer: 2,
-		ScaleX: 1,
-		ScaleY: 1,
-	}
+	tree.GetRoot().AddChild(sprite)
 
-	i := 0
 	finish := true
 	for finish {
-		tra.Rotation = float32(i) * 0.01
-		core.QueueSprite(&tra, &tex)
-		core.QueueSprite(&tra1, &tex)
-		core.QueueSprite(&tra2, &tex0)
+		sprite.Transform.Rotation += 0.01
+
+		tree.Process(0)
+
 		core.FinishFrame()
-		finish = core.BlockTillNextFrame()
-		if (core.IsKeyPressed('K')) {
-			i++
-		}
+		finish = core.BlockTillNextFrame()	
 	}
 }
