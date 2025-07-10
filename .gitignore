@@ -1,3 +1,7 @@
+# Local
+test/*.c
+core/CCore/resources
+
 # Prerequisites
 *.d
 
