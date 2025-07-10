@@ -111,6 +111,8 @@ func (child *Node) RemoveParent() {
 	})
 }
 
+// TODO: This can be moved to a function of runtime.AddCleanup (probably)
+// TODO: or remove this entirely.
 // Cannot guarenttee a node is destroyed. If a node A has a reference
 // in node B, node A will persist until node B is no longer referneced.
 // Attempting to access a node after this function is called is undefined

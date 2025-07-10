@@ -49,18 +49,45 @@ void main()\n\
 {\n\
 	FragColor = texture(tex0, TexCoord);\n\
 }";
+const char* DEFAULT_VERTEX_SHADER_FRAMEBUFFER_SOURCE = "\n\
+#version 460 core\n\n\
+layout (location = 0) in vec2 aPos;\n\
+layout (location = 1) in vec2 aTexCoord;\n\
+\n\
+out vec2 TexCoord;\n\
+\n\
+void main()\n\
+{\n\
+	TexCoord = aTexCoord;\n\
+	gl_Position = vec4(aPos, 0.0, 1.0);\n\
+}";
+const char* DEFAULT_FRAGMENT_SHADER_FRAMEBUFFER_SOURCE = "\
+#version 460 core\n\
+in vec2 TexCoord;\n\
+\n\
+out vec4 FragColor;\n\
+\n\
+uniform sampler2D tex0;\n\
+\n\
+void main()\n\
+{\n\
+	FragColor = texture(tex0, TexCoord);\n\
+}";
 static Sprite* spriteQueue = NULL;
 static unsigned int spriteCap = 0;
 static unsigned int spriteEnd = 0;
 static float capMultiplier = 2.0;
 
 // Rendering
-static Shader defaultShader = {};
+static Shader defaultShader = {}, frameBufferShader = {};
 static GLuint VAO = 0, VBO = 0, EBO = 0;
 static GLuint uCameraLocation = 0;
 static GLuint uModelLocation = 0;
 static GLuint uTextureLocation = 0;
 static vec3 cameraPosition = {0, 0, 0};
+
+static GLuint FBO = 0, RBO = 0, VAOF = 0, VBOF = 0, EBOF = 0;
+static GLuint frameBufferTexture = 0;
 
 static mat4 projectionMatrix = {};
 
@@ -188,9 +215,66 @@ extern int InitSprites() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+	/* - VAO, VBO, EBO | Sending data to GPU for quads - */
+	static const GLfloat verticesFull[] = {
+		-1.0f,  1.0f,	0.0f, 1.0f, // Top Left
+		 1.0,   1.0f,	1.0f, 1.0f, // Top Right
+		-1.0f, -1.0f,	0.0f, 0.0f, // Bottom Left
+		 1.0f, -1.0f,	1.0f, 0.0f, // Bottom Right
+	};
 
+	glGenVertexArrays(1, &VAOF);
+	glGenBuffers(1, &VBOF);
+	glGenBuffers(1, &EBOF);
+
+	glBindVertexArray(VAOF);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBOF);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesFull), verticesFull, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOF);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	/* ---- FrameBuffer ---- */
+	glGenFramebuffers(1, &FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+	glGenTextures(1, &frameBufferTexture);
+	glBindTexture(GL_TEXTURE_2D, frameBufferTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, DEFAULT_VIRTUAL_WINDOW_LENGTH, DEFAULT_VIRTUAL_WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBufferTexture, 0);
+
+	glGenRenderbuffers(1, &RBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, DEFAULT_VIRTUAL_WINDOW_LENGTH, DEFAULT_VIRTUAL_WINDOW_LENGTH);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	/* ---- Shader ---- */
 	defaultShader = NewShader(DEFAULT_VERTEX_SHADER_SOURCE, DEFAULT_FRAGMENT_SHADER_SOURCE);
 	if (!defaultShader.handle) return -1;
+
+	frameBufferShader = NewShader(DEFAULT_VERTEX_SHADER_FRAMEBUFFER_SOURCE, DEFAULT_FRAGMENT_SHADER_FRAMEBUFFER_SOURCE);
+	if (!frameBufferShader.handle) return -1;
 	
 	const float windowAspect = (float)DEFAULT_WINDOW_LENGTH/(float)DEFAULT_WINDOW_HEIGHT;
 	glm_mat4_identity(projectionMatrix);
@@ -236,7 +320,10 @@ extern void QueueSprite(
 
 extern void DrawSpriteQueue() {
 	assert(spritesInitialized);
-	
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+
 	glBindVertexArray(VAO);
 	UseShader(&defaultShader);
 
@@ -255,6 +342,15 @@ extern void DrawSpriteQueue() {
 		glUniformMatrix4fv(uModelLocation, 1, GL_FALSE, *spriteQueue[i].transform);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	UseShader(&frameBufferShader);
+	glBindVertexArray(VAOF);
+	glDisable(GL_DEPTH_TEST);
+	glBindTexture(GL_TEXTURE_2D, frameBufferTexture);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	spriteEnd = 0;
 }
