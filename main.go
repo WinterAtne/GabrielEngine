@@ -16,8 +16,6 @@ func main() {
 		Texture: &tex,
 	}, "sprite_0")
 
-	tree.GetRoot().AddChild(sprite)
-
 	finish := true
 	for finish {
 		sprite.Transform.Rotation += 0.01

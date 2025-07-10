@@ -85,7 +85,9 @@ func (parent *Node) AddChild(child *Node) {
 
 	child.parent = parent
 	parent.children = append(parent.children, child)
-	child.queueAdd()
+	if parent.index != -1 {
+		child.queueAdd()
+	}
 	})
 }
 
@@ -98,12 +100,14 @@ func (child *Node) RemoveParent() {
 		return
 	}
 
-	children := child.parent.children
+	parent := child.parent
+	parent.children[slices.Index(parent.children, child)] = parent.children[len(parent.children) - 1]
+	parent.children = parent.children[:len(parent.children) - 1]
 
-	children[slices.Index(children, child)] = children[len(children) - 1]
-	children = children[:len(children) - 1]
-	
-	child.queueRemove()
+	if child.parent.index != -1 {
+		child.queueRemove()
+	}
+	child.parent = nil
 	})
 }
 
@@ -134,6 +138,7 @@ func (node *Node) queueRemove() {
 		n.queueRemove()
 	}
 	queue[node.index] = queue[len(queue) - 1]
+	queue[node.index].index = node.index
 	queue = queue[:len(queue) - 1]
 	node.index = -1
 	node.script.OnRemove()
@@ -168,6 +173,14 @@ func CallDeffered(call func()) {
 }
 
 /* General Object Functions */
+
+func (node *Node) GetName() string {
+	return node.name
+}
+
+func (node *Node) GetParent() *Node {
+	return node.parent
+}
 
 // Gets the combined transform of a node, accounting for parents.
 // Takes a tree to avoid needing to rebuild the tree every frame.

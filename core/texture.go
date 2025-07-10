@@ -8,7 +8,6 @@ package core
 import "C"
 
 import (
-	"fmt"
 	"os"
 	"unsafe"
 )
@@ -29,8 +28,6 @@ func loadTextures() {
 
 	for _, file := range files {
 		if file.IsDir() { continue }
-
-		fmt.Println(file.Name())
 
 		var tex Texture
 		location := C.CString(texturesDir + file.Name())
