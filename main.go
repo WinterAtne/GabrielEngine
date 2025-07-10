@@ -19,15 +19,8 @@ func main() {
 
 	tree.GetRoot().AddChild(sprite)
 
-	// tra := core.Transform{
-	// 	ScaleX: 1,
-	// 	ScaleY: 1,
-	// }
-
 	finish := true
 	for finish {
-		// core.QueueSprite(&tra, &tex)
-		// tra.Rotation += 0.01
 
 		sprite.Transform.Rotation += 0.01
 
