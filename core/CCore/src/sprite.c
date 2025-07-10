@@ -9,7 +9,7 @@
 
 #include "errors.h"
 #include "texture.h"
-#include "window_options.h"
+#include "windowopt.h"
 #include "glfwwindow.h"
 
 typedef struct {
@@ -323,6 +323,7 @@ extern void DrawSpriteQueue() {
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	glViewport(0, 0, DEFAULT_VIRTUAL_WINDOW_LENGTH, DEFAULT_VIRTUAL_WINDOW_HEIGHT);
 
 	glBindVertexArray(VAO);
 	UseShader(&defaultShader);
@@ -344,6 +345,7 @@ extern void DrawSpriteQueue() {
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, DEFAULT_WINDOW_LENGTH, DEFAULT_WINDOW_HEIGHT);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	UseShader(&frameBufferShader);

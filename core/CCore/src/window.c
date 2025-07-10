@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "errors.h"
-#include "window_options.h"
+#include "windowopt.h"
 
 GLFWwindow* window = NULL;
 bool isWindowInitialized = false;
