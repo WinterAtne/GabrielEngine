@@ -1,5 +1,9 @@
 package tree
 
+import (
+	"fmt"
+)
+
 // Represents a game object with a position in 2d space.
 type Object struct {
 	node *Node
@@ -15,7 +19,9 @@ func (obj *Object) OnStart(node *Node) {
 	obj.node = node
 }
 
-func (obj *Object) OnProcess(_delta float32) {}
+func (obj *Object) OnProcess(_delta float32) {
+	fmt.Println("hi")
+}
 
 func (obj *Object) OnRemove() {}
 

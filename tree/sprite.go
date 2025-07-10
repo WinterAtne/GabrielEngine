@@ -1,7 +1,6 @@
 package tree
 
 import (
-
 	"github.com/WinterAtne/Engine/core"
 )
 

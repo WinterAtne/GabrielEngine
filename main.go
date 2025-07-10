@@ -12,12 +12,23 @@ func main() {
 	tex := core.GetTexture("test_text.png")
 	// tex0 := core.GetTexture("test_text_1.jpg")
 
-	sprite := tree.NewNode(&tree.Sprite{
+	sprite := tree.NewNode(
+	&tree.Sprite{
 		Texture: &tex,
 	}, "sprite_0")
 
+	tree.GetRoot().AddChild(sprite)
+
+	// tra := core.Transform{
+	// 	ScaleX: 1,
+	// 	ScaleY: 1,
+	// }
+
 	finish := true
 	for finish {
+		// core.QueueSprite(&tra, &tex)
+		// tra.Rotation += 0.01
+
 		sprite.Transform.Rotation += 0.01
 
 		tree.Process(0)
