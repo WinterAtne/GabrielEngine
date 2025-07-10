@@ -9,6 +9,7 @@
 
 #include "glfwwindow.h"
 #include "errors.h"
+#include "quad.h"
 #include "shader.h"
 #include "texture.h"
 #include "windowopt.h"
@@ -77,13 +78,14 @@ static float capMultiplier = 2.0;
 
 // Rendering
 static Shader defaultShader = {}, frameBufferShader = {};
-static GLuint VAO = 0, VBO = 0, EBO = 0;
+static Quad spriteQuad = {};
 static GLuint uCameraLocation = 0;
 static GLuint uModelLocation = 0;
 static GLuint uTextureLocation = 0;
 static vec3 cameraPosition = {0, 0, 0};
 
-static GLuint FBO = 0, RBO = 0, VAOF = 0, VBOF = 0, EBOF = 0;
+static GLuint FBO = 0, RBO = 0;
+static Quad frameBufferQuad = {};
 static GLuint frameBufferTexture = 0;
 
 static mat4 projectionMatrix = {};
@@ -91,8 +93,6 @@ static mat4 projectionMatrix = {};
 static bool spritesInitialized = false;
 
 /* ---- Private Functions ---- */
-
-
 
 extern int expandQueue() {
 	assert(spritesInitialized);
@@ -119,72 +119,12 @@ extern int InitSprites() {
 		spritesInitialized = true;
 	}
 
-	static const GLfloat vertices[] = {
-		-0.5f,  0.5f,	0.0f, 0.0f, // Top Left
-		 0.5,   0.5f,	1.0f, 0.0f, // Top Right
-		-0.5f, -0.5f,	0.0f, 1.0f, // Bottom Left
-		 0.5f, -0.5f,	1.0f, 1.0f, // Bottom Right
-	};
-	
-	static const GLuint indices[] = {
-		0, 2, 1,
-		2, 3, 1,
-	};
-
-	/* ---- VAO, VBO, EBO | Sending data to GPU for quads --- */
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	/* - VAO, VBO, EBO | Sending data to GPU for quads - */
-	static const GLfloat verticesFull[] = {
-		-1.0f,  1.0f,	0.0f, 1.0f, // Top Left
-		 1.0,   1.0f,	1.0f, 1.0f, // Top Right
-		-1.0f, -1.0f,	0.0f, 0.0f, // Bottom Left
-		 1.0f, -1.0f,	1.0f, 0.0f, // Bottom Right
-	};
-
-	glGenVertexArrays(1, &VAOF);
-	glGenBuffers(1, &VBOF);
-	glGenBuffers(1, &EBOF);
-
-	glBindVertexArray(VAOF);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBOF);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verticesFull), verticesFull, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOF);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	spriteQuad = NewQuad(false);
 
 	/* ---- FrameBuffer ---- */
+	frameBufferQuad = NewQuad(true);
 	glGenFramebuffers(1, &FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 
@@ -264,8 +204,8 @@ extern void DrawSpriteQueue() {
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, DEFAULT_VIRTUAL_WINDOW_LENGTH, DEFAULT_VIRTUAL_WINDOW_HEIGHT);
 
-	glBindVertexArray(VAO);
 	UseShader(&defaultShader);
+	UseQuad(&spriteQuad);
 
 	mat4 viewMatrix; glm_mat4_identity(viewMatrix);
 	glm_translate(viewMatrix, cameraPosition);
@@ -288,7 +228,7 @@ extern void DrawSpriteQueue() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	UseShader(&frameBufferShader);
-	glBindVertexArray(VAOF);
+	UseQuad(&frameBufferQuad);
 	glDisable(GL_DEPTH_TEST);
 	glBindTexture(GL_TEXTURE_2D, frameBufferTexture);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
