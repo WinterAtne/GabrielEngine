@@ -9,8 +9,12 @@ import (
 
 func main() {
 	core.Start()
+	tree.InitSprites()
 
 	tex := core.GetTexture("test.png")
+	core.FinishFrame()
+	core.BlockTillNextFrame()	
+	
 	for i := range 16 {
 		n := tree.NewNode(&tree.Sprite{Texture: &tex}, "sprite" + strconv.Itoa(i))
 		tree.GetRoot().AddChild(n)
@@ -22,18 +26,6 @@ func main() {
 		tree.GetRoot().AddChild(n)
 		n.Transform.PositionX = float32(i*16) + float32(- 128 + 8)
 	}
-
-	// for i := range 8 {
-	// 	n := tree.NewNode(&tree.Sprite{Texture: &tex}, "sprite" + strconv.Itoa(i))
-	// 	tree.GetRoot().AddChild(n)
-	// 	n.Transform.PositionY = float32(i*32) + float32(- 128 + 16)
-	// }
-	//
-	// for i := range 8 {
-	// 	n := tree.NewNode(&tree.Sprite{Texture: &tex}, "sprite" + strconv.Itoa(i))
-	// 	tree.GetRoot().AddChild(n)
-	// 	n.Transform.PositionX = float32(i*32) + float32(- 128 + 16)
-	// }
 
 	finish := true
 	for finish {
