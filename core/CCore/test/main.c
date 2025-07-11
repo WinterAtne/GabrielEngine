@@ -15,8 +15,8 @@ int main() {
 		exit(-1);
 	}
 
-	TextureID tex0 = NewTexture("resources/textures/test_text.png");
-	TextureID tex1 = NewTexture("resources/textures/test_text_1.jpg");
+	TextureID tex0 = NewTexture("resources/textures/test.png");
+	TextureID tex1 = NewTexture("resources/textures/test.png");
 
 	int i = 0;
 	while (!ShouldDestroyWindow()) {

@@ -9,8 +9,7 @@ import (
 func main() {
 	core.Start()
 
-	tex := core.GetTexture("test_text.png")
-	// tex0 := core.GetTexture("test_text_1.jpg")
+	tex := core.GetTexture("test.png")
 
 	sprite := tree.NewNode(
 	&tree.Sprite{
