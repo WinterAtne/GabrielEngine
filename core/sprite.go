@@ -11,8 +11,8 @@ func QueueSprite(transform *Transform, texture *Texture) {
 		C.QueueSprite(
 		C.float(transform.PositionX),
 		C.float(transform.PositionY),
-		C.float(transform.ScaleX * float32(C.DEFAULT_TILE)),
-		C.float(transform.ScaleY * float32(C.DEFAULT_TILE)),
+		C.float(transform.ScaleX * float32(texture.handle.width)),
+		C.float(transform.ScaleY * float32(texture.handle.height)),
 		C.float(transform.Rotation),
 		C.int(transform.Layer),
 		&texture.handle)
