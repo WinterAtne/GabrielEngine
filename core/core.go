@@ -50,6 +50,7 @@ func Start() bool {
 		panic("Failled to init window")
 	}
 	loadTextures()
+	loadShaders()
 
 	initFinish <- true // Initialization over
 	

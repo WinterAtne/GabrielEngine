@@ -3,7 +3,6 @@ package tree
 import (
 
 	"github.com/WinterAtne/Engine/core"
-	"github.com/WinterAtne/Engine/resources"
 )
 
 type Sprite struct {
@@ -13,18 +12,6 @@ type Sprite struct {
 	Shader *core.Shader
 }
 
-
-var defaultSpriteShader *core.Shader
-
-func InitSprites() {
-	core.CallOnRenderThead(func() {
-		defaultSpriteShader = core.NewShader(resources.DefaultSpriteVertexSource, resources.DefaultSpriteFragmentSource)
-	})
-}
-
-func GetShader() *core.Shader {
-	return defaultSpriteShader
-}
 
 /* Script Methods */
 func (sprite *Sprite) OnInit() {
@@ -36,7 +23,7 @@ func (sprite *Sprite) OnStart(node *Node) {
 	sprite.tree = sprite.node.GetTree()
 
 	if sprite.Shader == nil {
-		sprite.Shader = defaultSpriteShader
+		sprite.Shader = core.GetShader("default")
 	}
 }
 

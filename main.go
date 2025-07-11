@@ -9,7 +9,6 @@ import (
 
 func main() {
 	core.Start()
-	tree.InitSprites()
 
 	tex := core.GetTexture("test.png")
 	core.FinishFrame()

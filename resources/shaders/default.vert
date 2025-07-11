@@ -12,4 +12,3 @@ void main()
 	TexCoord = aTexCoord;
 	gl_Position = camera * model * vec4(aPos, 1.0, 1.0);
 }
-
