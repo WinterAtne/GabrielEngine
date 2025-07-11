@@ -1,4 +1,5 @@
 #pragma once
+#include "shader.h"
 #include "texture.h"
 
 extern int InitSprites();
@@ -9,6 +10,7 @@ extern void QueueSprite(
 		float scaleX, float scaleY,
 		float rotation,
 		int layer,
-		Texture* texture);
+		Texture* texture,
+		Shader* shader);
 
 extern void DrawSpriteQueue();

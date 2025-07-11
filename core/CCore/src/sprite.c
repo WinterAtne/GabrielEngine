@@ -16,37 +16,11 @@
 
 typedef struct {
 	mat4 transform;
+	Shader* shader;
 	Texture* texture;
 } Sprite;
 
 // Shaders
-const char* DEFAULT_VERTEX_SHADER_SOURCE = "\n\
-#version 460 core\n\n\
-layout (location = 0) in vec2 aPos;\n\
-layout (location = 1) in vec2 aTexCoord;\n\
-\n\
-uniform mat4 model;\n\
-uniform mat4 camera;\n\
-\n\
-out vec2 TexCoord;\n\
-\n\
-void main()\n\
-{\n\
-	TexCoord = aTexCoord;\n\
-	gl_Position = camera * model * vec4(aPos, 1.0, 1.0);\n\
-}";
-const char* DEFAULT_FRAGMENT_SHADER_SOURCE = "\
-#version 460 core\n\
-in vec2 TexCoord;\n\
-\n\
-out vec4 FragColor;\n\
-\n\
-uniform sampler2D tex0;\n\
-\n\
-void main()\n\
-{\n\
-	FragColor = texture(tex0, TexCoord);\n\
-}";
 const char* DEFAULT_VERTEX_SHADER_FRAMEBUFFER_SOURCE = "\n\
 #version 460 core\n\n\
 layout (location = 0) in vec2 aPos;\n\
@@ -149,8 +123,6 @@ extern int InitSprites() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	/* ---- Shader ---- */
-	defaultShader = NewShader(DEFAULT_VERTEX_SHADER_SOURCE, DEFAULT_FRAGMENT_SHADER_SOURCE);
-	if (!defaultShader.handle) return -1;
 
 	frameBufferShader = NewShader(DEFAULT_VERTEX_SHADER_FRAMEBUFFER_SOURCE, DEFAULT_FRAGMENT_SHADER_FRAMEBUFFER_SOURCE);
 	if (!frameBufferShader.handle) return -1;
@@ -164,9 +136,6 @@ extern int InitSprites() {
 				-1024.0f, 0.0f, // Z
 				 projectionMatrix); // Dest
 
-	uCameraLocation = glGetUniformLocation(defaultShader.handle, "camera");
-	uModelLocation = glGetUniformLocation(defaultShader.handle, "model");
-	uTextureLocation = glGetUniformLocation(defaultShader.handle, "tex0");
 
 	spriteCap = 1;
 	spriteQueue = malloc(spriteCap * sizeof(Sprite));
@@ -179,7 +148,8 @@ extern void QueueSprite(
 		float scaleX, float scaleY,
 		float rotation,
 		int layer,
-		Texture* texture) {
+		Texture* texture,
+		Shader* shader) {
 	assert(spritesInitialized);
 
 	if (spriteCap == spriteEnd) {
@@ -190,6 +160,7 @@ extern void QueueSprite(
 	}
 
 	spriteQueue[spriteEnd].texture = texture;
+	spriteQueue[spriteEnd].shader = shader;
 	mat4* transform = &spriteQueue[spriteEnd].transform;
 	glm_mat4_identity(*transform);
 	glm_translated(*transform, (vec3){positionX, positionY, (float)layer});
@@ -205,7 +176,6 @@ extern void DrawSpriteQueue() {
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, DEFAULT_VIRTUAL_WINDOW_LENGTH, DEFAULT_VIRTUAL_WINDOW_HEIGHT);
 
-	UseShader(&defaultShader);
 	UseQuad(&spriteQuad);
 
 	mat4 viewMatrix; glm_mat4_identity(viewMatrix);
@@ -213,12 +183,18 @@ extern void DrawSpriteQueue() {
 
 	mat4 cameraMatrix;
 	glm_mul(projectionMatrix, viewMatrix, cameraMatrix);
-	glUniformMatrix4fv(uCameraLocation, 1, GL_FALSE, *cameraMatrix);
 
 	for (int i = 0; i < spriteEnd; i++) {
+		UseShader(spriteQueue[i].shader);
+		uCameraLocation = glGetUniformLocation(spriteQueue[i].shader->handle, "camera");
+		uModelLocation = glGetUniformLocation(spriteQueue[i].shader->handle, "model");
+		uTextureLocation = glGetUniformLocation(spriteQueue[i].shader->handle, "tex0");
+		glUniformMatrix4fv(uCameraLocation, 1, GL_FALSE, *cameraMatrix);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, spriteQueue[i].texture->id);
 		glUniform1i(uTextureLocation, 0);
+
 
 		glUniformMatrix4fv(uModelLocation, 1, GL_FALSE, *spriteQueue[i].transform);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

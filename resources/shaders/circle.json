@@ -1,0 +1,4 @@
+{
+	"vertex": "circle.vert",
+	"fragment": "circle.frag"
+}
