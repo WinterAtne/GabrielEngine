@@ -16,7 +16,7 @@
 
 typedef struct {
 	mat4 transform;
-	TextureID texture;
+	Texture* texture;
 } Sprite;
 
 // Shaders
@@ -178,7 +178,7 @@ extern void QueueSprite(
 		float scaleX, float scaleY,
 		float rotation,
 		int layer,
-		TextureID texture) {
+		Texture* texture) {
 	assert(spritesInitialized);
 
 	if (spriteCap == spriteEnd) {
@@ -216,7 +216,7 @@ extern void DrawSpriteQueue() {
 
 	for (int i = 0; i < spriteEnd; i++) {
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, spriteQueue[i].texture);
+		glBindTexture(GL_TEXTURE_2D, spriteQueue[i].texture->id);
 		glUniform1i(uTextureLocation, 0);
 
 		glUniformMatrix4fv(uModelLocation, 1, GL_FALSE, *spriteQueue[i].transform);

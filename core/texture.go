@@ -13,7 +13,7 @@ import (
 )
 
 type Texture struct {
-	id uint32	
+	handle C.Texture
 }
 
 var textures map[string]Texture = make(map[string]Texture)
@@ -32,15 +32,11 @@ func loadTextures() {
 		var tex Texture
 		location := C.CString(texturesDir + file.Name())
 		defer C.free(unsafe.Pointer(location))
-		tex.id = uint32(C.NewTexture(location))
+		tex.handle = C.NewTexture(location)
 		textures[file.Name()] = tex
 	}
 }
 
 func GetTexture(name string) Texture {
 	return textures[name]
-}
-
-func (texture *Texture) GetID() uint32 {
-	return texture.id
 }

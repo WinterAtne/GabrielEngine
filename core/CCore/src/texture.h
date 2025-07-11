@@ -1,5 +1,8 @@
 #pragma once
 
-typedef unsigned int TextureID;
+typedef struct {
+	unsigned int id;
+	int width, height;
+} Texture;
 
-extern TextureID NewTexture(const char* location);
+extern Texture NewTexture(const char* location);

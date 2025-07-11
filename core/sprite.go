@@ -13,6 +13,6 @@ func QueueSprite(transform *Transform, texture *Texture) {
 		C.float(transform.ScaleY),
 		C.float(transform.Rotation),
 		C.int(transform.Layer),
-		C.uint(texture.GetID()))
+		&texture.handle)
 	})
 }

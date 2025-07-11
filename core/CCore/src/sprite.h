@@ -9,6 +9,6 @@ extern void QueueSprite(
 		float scaleX, float scaleY,
 		float rotation,
 		int layer,
-		TextureID texture);
+		Texture* texture);
 
 extern void DrawSpriteQueue();
