@@ -51,7 +51,7 @@ static unsigned int spriteEnd = 0;
 static float capMultiplier = 2.0;
 
 // Rendering
-static Shader defaultShader = {}, frameBufferShader = {};
+static Shader frameBufferShader = {};
 static Quad spriteQuad = {};
 static GLuint uCameraLocation = 0;
 static GLuint uModelLocation = 0;
