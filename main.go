@@ -29,7 +29,7 @@ func main() {
 	finish := true
 	for finish {
 
-		// tree.GetRoot().Transform.PositionX += 0.016
+		tree.GetRoot().Transform.Rotation += 0.016
 
 		tree.Process(0)
 

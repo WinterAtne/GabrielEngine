@@ -184,9 +184,13 @@ func (node *Node) GetParent() *Node {
 	return node.parent
 }
 
+// TODO: Make rotations and scales from parents apply correctly.
+// This will probably require changing how transforms are represented
+// under the hood.
+//
 // Gets the combined transform of a node, accounting for parents.
 // Takes a tree to avoid needing to rebuild the tree every frame.
-// Layer is not modified. Scale is multiplied.
+// Layer is not modified. Scale is multiplied. Rotation is added.
 func GlobalTransform(tree []*Node) *core.Transform {
 	global_transform := core.Transform{
 		Layer: tree[0].Transform.Layer,
