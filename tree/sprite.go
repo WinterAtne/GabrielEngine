@@ -6,6 +6,7 @@ import (
 
 type Sprite struct {
 	Object
+	tree []*Node
 	Texture *core.Texture
 }
 
@@ -16,12 +17,13 @@ func (sprite *Sprite) OnInit() {
 
 func (sprite *Sprite) OnStart(node *Node) {
 	sprite.Object.OnStart(node)
+	sprite.tree = sprite.node.GetTree()
 }
 
 func (sprite *Sprite) OnProcess(_delta float32) {
 	sprite.Object.OnProcess(_delta)
 
-	core.QueueSprite(&sprite.node.Transform, sprite.Texture)
+	core.QueueSprite(GlobalTransform(sprite.tree), sprite.Texture)
 }
 
 func (sprite *Sprite) OnRemove() {

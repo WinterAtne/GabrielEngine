@@ -133,8 +133,8 @@ extern int InitSprites() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, DEFAULT_VIRTUAL_WINDOW_LENGTH, DEFAULT_VIRTUAL_WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, frameBufferTexture, 0);
@@ -155,11 +155,12 @@ extern int InitSprites() {
 	frameBufferShader = NewShader(DEFAULT_VERTEX_SHADER_FRAMEBUFFER_SOURCE, DEFAULT_FRAGMENT_SHADER_FRAMEBUFFER_SOURCE);
 	if (!frameBufferShader.handle) return -1;
 	
-	const float windowAspect = (float)DEFAULT_WINDOW_LENGTH/(float)DEFAULT_WINDOW_HEIGHT;
+	float windowX = (float)DEFAULT_VIRTUAL_WINDOW_LENGTH/2;
+	float windowY = (float)DEFAULT_VIRTUAL_WINDOW_HEIGHT/2;
 	glm_mat4_identity(projectionMatrix);
 	glm_ortho(
-				-windowAspect, windowAspect, // x
-				-1, 1, // y
+				-windowX, windowX, // x
+				-windowY, windowY, // y
 				-1024.0f, 0.0f, // Z
 				 projectionMatrix); // Dest
 

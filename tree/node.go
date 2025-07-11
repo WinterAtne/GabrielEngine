@@ -190,6 +190,8 @@ func (node *Node) GetParent() *Node {
 func GlobalTransform(tree []*Node) *core.Transform {
 	global_transform := core.Transform{
 		Layer: tree[0].Transform.Layer,
+		ScaleX: 1,
+		ScaleY: 1,
 	}
 
 	for _, node := range tree {
