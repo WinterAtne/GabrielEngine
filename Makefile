@@ -35,6 +35,7 @@ GO := go
 GO_CLEAN := $(GO) clean -cache
 
 #--- Other CMDS ---#
+MAKE := make
 MKDIR := mkdir -p
 RMRF := rm -rf
 AR := ar -rcs
@@ -47,6 +48,13 @@ default: run
 run: $(CCORE_OUT_LIB)
 	$(GO) run .
 
+$(CCORE_OUT_LIB): $(CCORE_OBJS)
+	$(AR) $@ $(CCORE_OBJS) --record-libdeps \"$($CLIB)\"
+	$(MAKE) goclean
+
+$(OBJ_DIR)/%.o: %.c
+	$(CC) $(INC) $(CFLAGS) -c $< -o $@
+
 .PHONY: clean
 clean: goclean
 	$(RMRF) $(OUT_DIRS)
@@ -56,12 +64,3 @@ clean: goclean
 .PHONY: goclean 
 goclean:
 	$(GO_CLEAN)
-
-$(OBJ_DIR)/%.o: %.c
-	$(CC) $(INC) $(CFLAGS) -c $< -o $@
-
-$(CCORE_OUT_LIB): $(CCORE_OBJS)
-	$(AR) $@ $(CCORE_OBJS) --record-libdeps \"$($CLIB)\"
-	make goclean
-
-
