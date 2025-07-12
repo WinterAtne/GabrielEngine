@@ -24,14 +24,18 @@ CCORE_OUT_LIB := $(OUT_LIB_DIR)/lib$(CCORE).a
 CC = clang
 INC := -I$(CCORE_SRC_DIR) -I$(CCORE_LIB_DIR) -I$(CCORE_OPT_DIR)
 CLIB := -ldl -lglfw -lm
-CFLAGS_RELEASE := -Wall
-# CFLAGS_DEBUG := -fsanitize=address -g -O0 -Wall
+CFLAGS_RELEASE := -Wall -Werror
+CFLAGS_DEBUG := -fsanitize=address -g -O0
+CFLAGS := $(CFLAGS_RELEASE)
 
 CCORE_SRCS := $(wildcard $(CCORE_SRC_DIR)/*.c $(CCORE_LIB_DIR)/*.c $(CCORE_OPT_DIR)/*.c)
 CCORE_OBJS := $(addprefix $(OBJ_DIR)/, $(patsubst %.c,%.o,$(CCORE_SRCS)))
 
 #--- Go stuff ---#
 GO := go
+GO_RUN := $(GO) run
+GO_DEBUG_FLAGS := -asan
+GO_RUN_DEBUG := $(GO_RUN) $(GO_DEBUG_FLAGS)
 GO_CLEAN := $(GO) clean -cache
 
 #--- Other CMDS ---#
@@ -42,25 +46,32 @@ AR := ar -rcs
 
 #--- Targets ---#
 .PHONY: default
-default: run
+default: debug_run
 
 .PHONY: run
 run: $(CCORE_OUT_LIB)
-	$(GO) run .
+	$(GO_RUN) .
 
-$(CCORE_OUT_LIB): $(CCORE_OBJS)
+$(CCORE_OUT_LIB): $(CCORE_OBJS) go_clean
 	$(AR) $@ $(CCORE_OBJS) --record-libdeps \"$($CLIB)\"
-	$(MAKE) goclean
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
-clean: goclean
+clean: go_clean
 	$(RMRF) $(OUT_DIRS)
 
 	$(MKDIR) $(OUT_DIRS)
 
-.PHONY: goclean 
-goclean:
+.PHONY: go_clean 
+go_clean:
 	$(GO_CLEAN)
+
+.PHONY: debugrun
+debug_run: debug_ccore
+	CGO_CFLAGS="$(CFLAGS_DEBUG)" $(GO_RUN_DEBUG) .
+
+.PHONY: debug_ccore
+debug_ccore: CFLAGS+=$(CFLAGS_DEBUG)
+debug_ccore: $(CCORE_OUT_LIB)
