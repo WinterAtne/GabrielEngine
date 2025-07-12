@@ -1,7 +1,5 @@
 package core
 
-// #cgo LDFLAGS: -ldl -lglfw -lm -L${SRCDIR}/CCore/bin/lib -lCCore
-//
 // #include <stdlib.h>
 //
 // #include "CCore/src/shader.h"

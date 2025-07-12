@@ -13,7 +13,7 @@ If an external function needs to be called on the render thread use CallOnRender
 */
 package core
 
-// #cgo LDFLAGS: -ldl -lglfw -lm -L${SRCDIR}/CCore/bin/lib -lCCore
+// #cgo LDFLAGS: -ldl -lglfw -lm -L${SRCDIR}/../bin/lib -lccore
 //
 // #include "CCore/src/window.h"
 // #include "CCore/src/sprite.h"
