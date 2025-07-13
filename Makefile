@@ -36,6 +36,7 @@ GO := go
 GO_RUN := $(GO) run
 GO_BUILD := $(GO) build
 GO_DEBUG_FLAGS := -asan -gcflags="all=-N -l"
+GO_RUN_DEBUG := $(GO_RUN) $(GO_DEBUG_FLAGS)
 GO_BUILD_DEBUG := $(GO_BUILD) $(GO_DEBUG_FLAGS)
 GO_CLEAN := $(GO) clean -cache
 
