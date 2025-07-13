@@ -17,7 +17,7 @@ OUT_OBJ_DIRS  := $(addprefix $(OBJ_DIR)/, $(CCORE_DIR) $(CCORE_CMD_DIR) $(CCORE_
 
 OUT_DIRS := $(OUT_BIN_DIR) $(OUT_LIB_DIR) $(OUT_CMD_DIR) $(OUT_OBJ_DIR) $(OUT_OBJ_DIRS)
 
-#--- C stuff --- *#
+#--- C stuff ---#
 CCORE := ccore
 CCORE_OUT_LIB := $(OUT_LIB_DIR)/lib$(CCORE).a
 
@@ -35,27 +35,37 @@ CCORE_OBJS := $(addprefix $(OBJ_DIR)/, $(patsubst %.c,%.o,$(CCORE_SRCS)))
 GO := go
 GO_RUN := $(GO) run
 GO_BUILD := $(GO) build
-GO_DEBUG_FLAGS := -asan -gcflags '-N -l'
-GO_RUN_DEBUG := $(GO_RUN) $(GO_DEBUG_FLAGS)
+GO_DEBUG_FLAGS := -asan -gcflags="all=-N -l"
+GO_BUILD_DEBUG := $(GO_BUILD) $(GO_DEBUG_FLAGS)
 GO_CLEAN := $(GO) clean -cache
+
+GO_OUT_EXE := $(OUT_CMD_DIR)/$(NAME)
+GO_OUT_EXE_DEBUG := $(OUT_CMD_DIR)/$(NAME)
 
 #--- Other CMDS ---#
 MAKE := make
 MKDIR := mkdir -p
 RMRF := rm -rf
 AR := ar -rcs
+DELVE := dlv exec
 
 #--- Targets ---#
 .PHONY: default
 default: debug_run
 
-.PHONY: run
-run: $(CCORE_OUT_LIB)
-	$(GO_RUN) .
-
 .PHONY: debug_run
 debug_run: debug_ccore
 	CGO_CFLAGS="$(CFLAGS_DEBUG)" $(GO_RUN_DEBUG) .
+
+.PHONY: debug_build
+debug_build: $(GO_OUT_EXE_DEBUG)
+
+.PHONY: debug
+debug: $(GO_OUT_EXE_DEBUG)
+	$(DELVE) $<
+
+$(GO_OUT_EXE_DEBUG): debug_ccore
+	CGO_CFLAGS="$(CFLAGS_DEBUG)" $(GO_BUILD_DEBUG) -o $@ .
 
 .PHONY: debug_ccore
 debug_ccore: CFLAGS+=$(CFLAGS_DEBUG)
