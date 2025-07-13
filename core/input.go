@@ -1,7 +1,5 @@
 package core
 
-// #cgo LDFLAGS: -ldl -lglfw -lm -L${SRCDIR}/CCore/bin/lib -lCCore
-//
 // #include "CCore/src/input.h"
 import "C"
 
