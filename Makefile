@@ -34,7 +34,8 @@ CCORE_OBJS := $(addprefix $(OBJ_DIR)/, $(patsubst %.c,%.o,$(CCORE_SRCS)))
 #--- Go stuff ---#
 GO := go
 GO_RUN := $(GO) run
-GO_DEBUG_FLAGS := -asan
+GO_BUILD := $(GO) build
+GO_DEBUG_FLAGS := -asan -gcflags '-N -l'
 GO_RUN_DEBUG := $(GO_RUN) $(GO_DEBUG_FLAGS)
 GO_CLEAN := $(GO) clean -cache
 
@@ -52,8 +53,17 @@ default: debug_run
 run: $(CCORE_OUT_LIB)
 	$(GO_RUN) .
 
-$(CCORE_OUT_LIB): $(CCORE_OBJS) go_clean
+.PHONY: debug_run
+debug_run: debug_ccore
+	CGO_CFLAGS="$(CFLAGS_DEBUG)" $(GO_RUN_DEBUG) .
+
+.PHONY: debug_ccore
+debug_ccore: CFLAGS+=$(CFLAGS_DEBUG)
+debug_ccore: $(CCORE_OUT_LIB)
+
+$(CCORE_OUT_LIB): $(CCORE_OBJS)
 	$(AR) $@ $(CCORE_OBJS) --record-libdeps \"$($CLIB)\"
+	$(MAKE) go_clean
 
 $(OBJ_DIR)/%.o: %.c
 	$(CC) $(INC) $(CFLAGS) -c $< -o $@
@@ -68,10 +78,3 @@ clean: go_clean
 go_clean:
 	$(GO_CLEAN)
 
-.PHONY: debugrun
-debug_run: debug_ccore
-	CGO_CFLAGS="$(CFLAGS_DEBUG)" $(GO_RUN_DEBUG) .
-
-.PHONY: debug_ccore
-debug_ccore: CFLAGS+=$(CFLAGS_DEBUG)
-debug_ccore: $(CCORE_OUT_LIB)
