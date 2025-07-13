@@ -1,7 +1,9 @@
 package main
 
 import (
-	"strconv"
+	// "strconv"
+
+	"fmt"
 
 	"github.com/WinterAtne/Engine/core"
 	"github.com/WinterAtne/Engine/tree"
@@ -14,20 +16,30 @@ func main() {
 	core.FinishFrame()
 	core.BlockTillNextFrame()	
 	
-	for i := range 16 {
-		n := tree.NewNode(&tree.Sprite{Texture: &tex}, "sprite" + strconv.Itoa(i))
-		tree.GetRoot().AddChild(n)
-		n.Transform.PositionY = float32(i*16) + float32(- 128 + 8)
-	}
+	// for i := range 16 {
+	// 	n := tree.NewNode(&tree.Sprite{Texture: &tex}, "sprite" + strconv.Itoa(i))
+	// 	tree.GetRoot().AddChild(n)
+	// 	n.Transform.PositionY = float32(i*16) + float32(- 128 + 8)
+	// }
+	//
+	// for i := range 16 {
+	// 	n := tree.NewNode(&tree.Sprite{Texture: &tex}, "sprite" + strconv.Itoa(i))
+	// 	tree.GetRoot().AddChild(n)
+	// 	n.Transform.PositionX = float32(i*16) + float32(- 128 + 8)
+	// }
 
-	for i := range 16 {
-		n := tree.NewNode(&tree.Sprite{Texture: &tex, Shader: core.GetShader("circle")}, "sprite" + strconv.Itoa(i))
-		tree.GetRoot().AddChild(n)
-		n.Transform.PositionX = float32(i*16) + float32(- 128 + 8)
-	}
+	character := tree.NewNode(&tree.Sprite{Texture: &tex, Shader: core.GetShader("circle")}, "character")
+	tree.GetRoot().AddChild(character)
 
 	finish := true
 	for finish {
+
+		mouseX, mouseY := core.GetMousePosition()
+
+		fmt.Printf("%f, %f\n", mouseX, mouseY)
+
+		character.Transform.PositionX = mouseX
+		character.Transform.PositionY = mouseY
 
 		// tree.GetRoot().Transform.Rotation += 0.016
 
