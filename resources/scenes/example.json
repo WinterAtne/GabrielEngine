@@ -16,20 +16,57 @@
 
 	"children": [
 		{
-			"Type": "Object",
+			"type": "Sprite",
 			"name": "o0",
+
+			"texture": "test32.png",
+			"shader": "default",
+
 			"transform": {
-				"PositionX": 0.0,
+				"PositionX": -40.0,
 				"PositionY": 0.0,
 				"ScaleX": 1.0,
 				"ScaleY": 1.0,
 				"Rotation": 0.0,
 				"Layer": 5
-			}
+			}, 
+
+			"children": [
+				{
+					"type": "Sprite",
+					"name": "o3",
+
+					"texture": "test.png",
+					"shader": "circle",
+
+					"transform": {
+						"PositionX": 0.0,
+						"PositionY": -40.0,
+						"ScaleX": 1.0,
+						"ScaleY": 1.0,
+						"Rotation": 0.0,
+						"Layer": 5
+					},
+					"children": []
+				}
+			]
 		},
 		{
-			"Type": "Object",
-			"name": "o1"
+			"type": "Sprite",
+			"name": "o1",
+
+			"texture": "test32.png",
+			"shader": "default",
+
+			"transform": {
+				"PositionX": 32.0,
+				"PositionY": 0.0,
+				"ScaleX": 1.0,
+				"ScaleY": 1.0,
+				"Rotation": 0.0,
+				"Layer": 5
+			},
+			"children": []
 		}
 	]
 }
