@@ -1,0 +1,35 @@
+{
+	"type": "Sprite",
+	"name": "sprite",
+
+	"texture": "test.png",
+	"shader": "default",
+
+	"transform": {
+		"PositionX": 0.0,
+		"PositionY": 64.0,
+		"ScaleX": 1.0,
+		"ScaleY": 1.0,
+		"Rotation": 0.0,
+		"Layer": 1
+	},
+
+	"children": [
+		{
+			"Type": "Object",
+			"name": "o0",
+			"transform": {
+				"PositionX": 0.0,
+				"PositionY": 0.0,
+				"ScaleX": 1.0,
+				"ScaleY": 1.0,
+				"Rotation": 0.0,
+				"Layer": 5
+			}
+		},
+		{
+			"Type": "Object",
+			"name": "o1"
+		}
+	]
+}

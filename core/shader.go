@@ -14,9 +14,10 @@ import (
 
 type Shader struct {
 	handle C.Shader
+	Name string
 }
 
-var shaders map[string]*Shader = make(map[string]*Shader)
+var shaders map[string]Shader = make(map[string]Shader)
 
 func loadShaders() {
 	const shadersDir string = "resources/shaders/"
@@ -59,15 +60,16 @@ func loadShaders() {
 		}
 
 		shader := NewShader(string(vertexSource), string(fragmentSource))
+		shader.Name = def.Name
 		shaders[def.Name] = shader
 	}
 }
 
-func GetShader(name string) *Shader {
+func GetShader(name string) Shader {
 	return (shaders[name])
 }
 
-func NewShader(vertexSource, fragmentSource string) *Shader {
+func NewShader(vertexSource, fragmentSource string) Shader {
 	vertex := C.CString(vertexSource)
 	fragment := C.CString(fragmentSource)
 
@@ -75,5 +77,11 @@ func NewShader(vertexSource, fragmentSource string) *Shader {
 
 	C.free(unsafe.Pointer(vertex))
 	C.free(unsafe.Pointer(fragment))
-	return &shader
+	return shader
+}
+
+
+func (shader *Shader) UnmarshalJSON(data []byte) error {
+	shader.handle = shaders[string(data[1:len(data)-1])].handle
+	return nil
 }

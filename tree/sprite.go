@@ -1,7 +1,6 @@
 package tree
 
 import (
-
 	"github.com/WinterAtne/Engine/core"
 )
 
@@ -11,7 +10,6 @@ type Sprite struct {
 	Texture *core.Texture
 	Shader *core.Shader
 }
-
 
 /* Script Methods */
 func (sprite *Sprite) OnInit() {
@@ -23,7 +21,7 @@ func (sprite *Sprite) OnStart(node *Node) {
 	sprite.tree = sprite.node.GetTree()
 
 	if sprite.Shader == nil {
-		sprite.Shader = core.GetShader("default")
+		*sprite.Shader = core.GetShader("default")
 	}
 }
 

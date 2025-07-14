@@ -1,7 +1,7 @@
 package core
 
 type Transform struct {
-	PositionX float32
+	PositionX float32 
 	PositionY float32
 
 	ScaleX float32
