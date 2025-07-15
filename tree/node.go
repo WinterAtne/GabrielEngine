@@ -43,18 +43,6 @@ var queue []*Node
 // Function calls which have been defered to the end of the frame.
 var defferedCalls []func()
 
-var root *Node
-
-/* Init */
-func init() {
-	root = NewNode(new(Object), "root")
-	root.queueAdd()
-}
-
-func GetRoot() *Node {
-	return root
-}
-
 /* --- Queue / Tree Operations --- */
 
 // Creates a new unqueued node.
