@@ -6,6 +6,7 @@ package core
 import "C"
 
 import (
+	"fmt"
 	"encoding/json"
 	"os"
 	"strings"
@@ -82,6 +83,12 @@ func NewShader(vertexSource, fragmentSource string) Shader {
 
 
 func (shader *Shader) UnmarshalJSON(data []byte) error {
-	shader.handle = shaders[string(data[1:len(data)-1])].handle
+	name := string(data[1:len(data)-1])
+	if newShader, has := shaders[name]; has {
+		*shader = newShader
+		return nil
+	} else {
+		return fmt.Errorf("shader %s undefined", name)
+	}
 	return nil
 }
