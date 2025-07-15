@@ -12,6 +12,10 @@ type Object struct {
 
 
 /* Script Methods */
+func init() {
+	RegisterScriptName("Object", func() Script {return new(Object)})
+}
+
 func (obj *Object) OnInit() {}
 
 func (obj *Object) OnStart(node *Node) {

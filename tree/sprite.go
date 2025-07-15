@@ -11,6 +11,10 @@ type Sprite struct {
 	Shader *core.Shader
 }
 
+func init() {
+	RegisterScriptName("Sprite", func() Script {return new(Sprite)})
+}
+
 /* Script Methods */
 func (sprite *Sprite) OnInit() {
 	sprite.Object.OnInit()

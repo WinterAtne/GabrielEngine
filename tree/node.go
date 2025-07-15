@@ -76,9 +76,12 @@ func NewNode(script Script, name string) *Node {
 
 // Places a node as the child of parent. Places child in the queue.
 func (parent *Node) AddChild(child *Node) {
+
 	CallDeffered(func() {
-	// Second condition should never happen if the first condition is true
-	if child.parent != nil || child.index != -1 {
+	if child == nil {
+		log.Printf("Warning: attempted to give nil child parent")
+		return
+	} else if child.parent != nil || child.index != -1 {
 		log.Printf("Warning: child %s already has parent", child.name)
 		return
 	}
