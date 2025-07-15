@@ -1,0 +1,10 @@
+{
+	"type": "Object",
+	"name": "main",
+
+	"children": [
+		{
+			"scene": "example.json"
+		}
+	]
+}
