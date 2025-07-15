@@ -24,7 +24,7 @@ type Node struct {
 	index int
 	parent *Node
 	children []*Node
-	 Script
+	Script
 
 	Transform core.Transform
 }
