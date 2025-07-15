@@ -2,8 +2,8 @@ package main
 
 import (
 
-	"github.com/WinterAtne/Engine/core"
-	"github.com/WinterAtne/Engine/tree"
+	"github.com/WinterAtne/GabrielEngine/core"
+	"github.com/WinterAtne/GabrielEngine/tree"
 )
 
 func main() {

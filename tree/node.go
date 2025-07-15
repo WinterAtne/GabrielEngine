@@ -13,7 +13,7 @@ import (
 	"log"
 	"slices"
 
-	"github.com/WinterAtne/Engine/core"
+	"github.com/WinterAtne/GabrielEngine/core"
 )
 
 // Represents a single node in the tree. Can have at most one script and one parent.
