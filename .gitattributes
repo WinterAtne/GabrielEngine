@@ -1,2 +1,3 @@
 *.h linguist-language=C
 *.go linguist-language=Go
+core/CCore/lib/** linguist-vendored
