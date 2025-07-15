@@ -1,3 +1,3 @@
-module github.com/WinterAtne/Engine
+module github.com/WinterAtne/GabrielEngine
 
 go 1.24.4

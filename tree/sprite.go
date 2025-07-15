@@ -2,7 +2,7 @@ package tree
 
 import (
 
-	"github.com/WinterAtne/Engine/core"
+	"github.com/WinterAtne/GabrielEngine/core"
 )
 
 type Sprite struct {
