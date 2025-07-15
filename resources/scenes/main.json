@@ -1,0 +1,28 @@
+{
+	"type": "Object",
+	"name": "main",
+
+	"children": [
+		{
+			"scene": "example.json",
+			"children": [
+				{
+					"type": "Sprite",
+					"name": "o5",
+					
+					"texture": "test32.png",
+					"shader": "circle",
+					
+					"transform": {
+						"PositionX": 0.0,
+						"PositionY": -40.0,
+						"ScaleX": 1.0,
+						"ScaleY": 1.0,
+						"Rotation": 0.0,
+						"Layer": 5
+					}
+				}
+			]
+		}
+	]
+}

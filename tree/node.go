@@ -24,7 +24,7 @@ type Node struct {
 	index int
 	parent *Node
 	children []*Node
-	script Script
+	 Script
 
 	Transform core.Transform
 }
@@ -43,18 +43,6 @@ var queue []*Node
 // Function calls which have been defered to the end of the frame.
 var defferedCalls []func()
 
-var root *Node
-
-/* Init */
-func init() {
-	root = NewNode(new(Object), "root")
-	root.queueAdd()
-}
-
-func GetRoot() *Node {
-	return root
-}
-
 /* --- Queue / Tree Operations --- */
 
 // Creates a new unqueued node.
@@ -62,23 +50,26 @@ func NewNode(script Script, name string) *Node {
 	node := &Node{
 		name: name,
 		index: -1,
-		script: script,
+		Script: script,
 		Transform: core.Transform{
 			ScaleX: 1,
 			ScaleY: 1,
 		},
 	}
 
-	node.script.OnInit()
+	node.Script.OnInit()
 
 	return node
 }
 
 // Places a node as the child of parent. Places child in the queue.
 func (parent *Node) AddChild(child *Node) {
+
 	CallDeffered(func() {
-	// Second condition should never happen if the first condition is true
-	if child.parent != nil || child.index != -1 {
+	if child == nil {
+		log.Printf("Warning: attempted to give nil child parent")
+		return
+	} else if child.parent != nil || child.index != -1 {
 		log.Printf("Warning: child %s already has parent", child.name)
 		return
 	}
@@ -131,7 +122,7 @@ func (node *Node) queueAdd() {
 	for _, n := range node.children {
 		n.queueAdd()
 	}
-	node.script.OnStart(node)
+	node.Script.OnStart(node)
 }
 
 // Recursively removes a node and its children from the queue.
@@ -143,7 +134,7 @@ func (node *Node) queueRemove() {
 	queue[node.index].index = node.index
 	queue = queue[:len(queue) - 1]
 	node.index = -1
-	node.script.OnRemove()
+	node.Script.OnRemove()
 }
 
 // Recursively calls the destructor on a node and its children.
@@ -151,15 +142,15 @@ func (node *Node) destroy() {
 	for _, n := range node.children {
 		n.destroy()
 	}
-	node.script.OnDestroy()
+	node.Script.OnDestroy()
 }
 
 /* --- Processes --- */
 
-// Calls OnProcess on all node scripts in the queue.
+// Calls OnProcess on all node.Scripts in the queue.
 func Process(_delta float32) {
 	for _, node := range queue {
-		node.script.OnProcess(_delta)
+		node.Script.OnProcess(_delta)
 	}
 
 	for _, call := range defferedCalls {
@@ -221,5 +212,9 @@ func (node *Node) GetTree() []*Node {
 	}
 
 	return tree
+}
+
+func (node *Node) GetChildren() []*Node {
+	return node.children
 }
 

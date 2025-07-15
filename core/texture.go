@@ -12,6 +12,7 @@ import (
 
 type Texture struct {
 	handle C.Texture
+	Name string
 }
 
 var textures map[string]Texture = make(map[string]Texture)
@@ -31,10 +32,17 @@ func loadTextures() {
 		location := C.CString(texturesDir + file.Name())
 		defer C.free(unsafe.Pointer(location))
 		tex.handle = C.NewTexture(location)
+		tex.Name = file.Name()
 		textures[file.Name()] = tex
 	}
 }
 
 func GetTexture(name string) Texture {
 	return textures[name]
+}
+
+func (tex *Texture) UnmarshalJSON(data []byte) error {
+	tex.handle = textures[string(data[1:len(data)-1])].handle
+	tex.Name = textures[string(data[1:len(data)-1])].Name
+	return nil
 }

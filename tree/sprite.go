@@ -1,7 +1,6 @@
 package tree
 
 import (
-
 	"github.com/WinterAtne/GabrielEngine/core"
 )
 
@@ -12,6 +11,9 @@ type Sprite struct {
 	Shader *core.Shader
 }
 
+func init() {
+	RegisterScriptName("Sprite", func() Script {return new(Sprite)})
+}
 
 /* Script Methods */
 func (sprite *Sprite) OnInit() {
@@ -23,7 +25,7 @@ func (sprite *Sprite) OnStart(node *Node) {
 	sprite.tree = sprite.node.GetTree()
 
 	if sprite.Shader == nil {
-		sprite.Shader = core.GetShader("default")
+		*sprite.Shader = core.GetShader("default")
 	}
 }
 
