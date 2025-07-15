@@ -79,26 +79,27 @@ func (node *Node) UnmarshalJSON(data []byte) error {
 		err = json.Unmarshal(data, &node.Script)
 		if err != nil { panic(err) }
 		
-		if c, has := defs["children"]; has {
-			var rawChildren []json.RawMessage
-			err = json.Unmarshal(c, &rawChildren)
-			if err != nil { panic(err) }
-			for _, childData := range rawChildren {
-				var child *Node
-				err := json.Unmarshal(childData, &child)
-				if err != nil {panic(err)}
-				node.AddChild(child)
-			}
-		}
 	} else if sstr, has := defs["scene"]; has {
 		if sdef, has := scenes[string(sstr)[1:len(sstr)-1]]; has {
 			err := json.Unmarshal([]byte(sdef.definition), node)
-			if err != nil {
-				panic(err)
-			}
+			if err != nil {panic(err)}
+		} else {
+			panic("Unknown scene")
 		}
 	}
 
+	// Recurse through children
+	if c, has := defs["children"]; has {
+		var rawChildren []json.RawMessage
+		err = json.Unmarshal(c, &rawChildren)
+		if err != nil { panic(err) }
+		for _, childData := range rawChildren {
+			var child *Node
+			err := json.Unmarshal(childData, &child)
+			if err != nil {panic(err)}
+			node.AddChild(child)
+		}
+	}
 
 	return nil
 }
