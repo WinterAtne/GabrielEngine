@@ -2,6 +2,7 @@ package tree
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -22,6 +23,8 @@ type mockStruct struct {
 
 func init() {
 	RegisterScriptName("mockNode", func() Script {return new(mockNode)})
+	os.Chdir("../")
+	LoadScenes()
 }
 
 func nodePrint(a *Node) {
@@ -37,18 +40,15 @@ func nodePrint(a *Node) {
 // Validates that scene.Instantiate can properly instante a working node which
 // is defined in resources/scenes/test_work.json & test_work_child.json
 func TestSceneInstantiateWork(t *testing.T) {
-	t.Chdir("../")
-	LoadScenes()
-
 	mtest_work := NewNode(new(Object), "test_work")
 	mexample := NewNode(new(Object), "example")
 	mexample.Transform = core.Transform{
 		PositionX: 0.0,
-		PositionY: 64.0,
+		PositionY: -40.0,
 		ScaleX: 1.0,
 		ScaleY: 1.0,
 		Rotation: 0.0,
-		Layer: 1,
+		Layer: 2,
 	}
 
 	mtest_work.AddChild(mexample)
@@ -123,3 +123,22 @@ func TestSceneInstantiateWork(t *testing.T) {
 		t.Errorf("\n%v\n%v\n", test_work.children[0].children[2].Script, mo5.Script)
 	}
 }
+
+func TestSceneInstantiateUIT(t *testing.T) {
+	test_uit, err := GetScene("test_uit.json").Instantiate()
+	if err == nil {
+		t.Errorf("Did not catch unknown instance type")
+	} else if test_uit != nil {
+		t.Errorf("Did not return nil")
+	}
+}
+
+func TestSceneInstantiateInvalidScript(t *testing.T) {
+	test_uit, err := GetScene("test_invalid_script.json").Instantiate()
+	if err == nil {
+		t.Errorf("Did not catch invalid script")
+	} else if test_uit != nil {
+		t.Errorf("Did not return nil")
+	}
+}
+

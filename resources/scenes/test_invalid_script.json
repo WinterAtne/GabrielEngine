@@ -1,0 +1,13 @@
+{
+	"type": "___blah___blah___blah___",
+	"name": "Hello, World!",
+
+	"transform": {
+		"PositionX": 0.0,
+		"PositionY": 64.0,
+		"ScaleX": 1.0,
+		"ScaleY": 1.0,
+		"Rotation": 0.0,
+		"Layer": 1
+	}
+}

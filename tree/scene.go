@@ -107,15 +107,6 @@ func (node *Node) UnmarshalJSON(data []byte) error {
 		newNode := NewNode(script, name)
 		*node = *newNode
 
-		if trans, has := defs["transform"]; has {
-			err := json.Unmarshal(trans, &node.Transform)
-			if err != nil { 
-				return fmt.Errorf("%w: invalid transform: %w", instanceError, err)
-			}
-
-		} else {
-			node.Transform = newNode.Transform
-		}
 		
 		err = json.Unmarshal(data, &node.Script)
 		if err != nil {
@@ -137,6 +128,14 @@ func (node *Node) UnmarshalJSON(data []byte) error {
 
 	} else {
 		return fmt.Errorf("%w: unknown instance type", instanceError)
+	}
+
+	if trans, has := defs["transform"]; has {
+		err := json.Unmarshal(trans, &node.Transform)
+		if err != nil { 
+			return fmt.Errorf("%w: invalid transform: %w", instanceError, err)
+		}
+
 	}
 
 	// Recurse through children

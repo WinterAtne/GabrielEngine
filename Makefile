@@ -70,6 +70,10 @@ debug: $(GO_OUT_EXE_DEBUG)
 test: debug_ccore
 	$(GO_TEST) ./...
 
+.PHONY: test_cover
+test_cover: debug_ccore
+	$(GO_TEST) -cover ./...
+
 $(GO_OUT_EXE_DEBUG): debug_ccore
 	CGO_CFLAGS="$(CFLAGS_DEBUG)" $(GO_BUILD_DEBUG) -o $@ .
 
