@@ -35,6 +35,7 @@ type Script interface {
 	OnStart(node *Node)
 	OnProcess(_delta float32)
 	OnRemove()
+	OnDestroy()
 }
 
 // The node queue. Nodes in the queue are processed. Those which are not... are not.
@@ -50,6 +51,10 @@ func NewNode(script Script, name string) *Node {
 		name: name,
 		index: -1,
 		Script: script,
+		Transform: core.Transform{
+			ScaleX: 1,
+			ScaleY: 1,
+		},
 	}
 
 	node.Script.OnInit()
@@ -149,19 +154,27 @@ func (node *Node) GetParent() *Node {
 	return node.parent
 }
 
-func (node *Node) GetChildren() []*Node {
-	return node.children
-}
-
+// TODO: Make rotations and scales from parents apply correctly.
+// This will probably require changing how transforms are represented
+// under the hood.
+//
+// Gets the combined transform of a node, accounting for parents.
+// Takes a tree to avoid needing to rebuild the tree every frame.
+// Layer is not modified. Scale is multiplied. Rotation is added.
 func GlobalTransform(tree []*Node) *core.Transform {
 	global_transform := core.Transform{
 		Layer: tree[0].Transform.Layer,
+		ScaleX: 1,
+		ScaleY: 1,
 	}
 
 	for _, node := range tree {
 		global_transform = core.Transform{
 			PositionX: node.Transform.PositionX + global_transform.PositionX,
 			PositionY: node.Transform.PositionY + global_transform.PositionY,
+			ScaleX: node.Transform.ScaleX * global_transform.ScaleX,
+			ScaleY: node.Transform.ScaleY * global_transform.ScaleY,
+			Rotation: node.Transform.Rotation + global_transform.Rotation,
 			Layer: global_transform.Layer,
 		}
 	}
@@ -178,5 +191,9 @@ func (node *Node) GetTree() []*Node {
 	}
 
 	return tree
+}
+
+func (node *Node) GetChildren() []*Node {
+	return node.children
 }
 

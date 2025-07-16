@@ -26,5 +26,3 @@ func (obj *Object) OnProcess(_delta float32) {}
 
 func (obj *Object) OnRemove() {}
 
-func (obj *Object) OnDestroy() {}
-

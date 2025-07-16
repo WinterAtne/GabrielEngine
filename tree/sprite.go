@@ -38,7 +38,3 @@ func (sprite *Sprite) OnProcess(_delta float32) {
 func (sprite *Sprite) OnRemove() {
 	sprite.Object.OnRemove()
 }
-
-func (sprite *Sprite) OnDestroy() {
-	sprite.Object.OnDestroy()
-}

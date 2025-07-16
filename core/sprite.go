@@ -9,9 +9,9 @@ func QueueSprite(transform *Transform, texture *Texture, shader *Shader) {
 		C.QueueSprite(
 		C.float(transform.PositionX),
 		C.float(transform.PositionY),
-		C.float(transform.ScaleX * float32(texture.handle.width)),
-		C.float(transform.ScaleY * float32(texture.handle.height)),
-		C.float(transform.Rotation),
+		C.float(float32(texture.handle.width)),
+		C.float(float32(texture.handle.height)),
+		C.float(0.0),
 		C.int(transform.Layer),
 		&texture.handle,
 		&shader.handle)
