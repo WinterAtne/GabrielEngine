@@ -45,9 +45,6 @@ func TestSceneInstantiateWork(t *testing.T) {
 	mexample.Transform = core.Transform{
 		PositionX: 0.0,
 		PositionY: -40.0,
-		ScaleX: 1.0,
-		ScaleY: 1.0,
-		Rotation: 0.0,
 		Layer: 2,
 	}
 
@@ -57,9 +54,6 @@ func TestSceneInstantiateWork(t *testing.T) {
 	mo0.Transform = core.Transform{
 		PositionX: -40.0,
 		PositionY: 0.0,
-		ScaleX: 1.0,
-		ScaleY: 1.0,
-		Rotation: 0.0,
 		Layer: 5,
 	}
 
@@ -67,9 +61,6 @@ func TestSceneInstantiateWork(t *testing.T) {
 	mo1.Transform = core.Transform{
 		PositionX: 32.0,
 		PositionY: 0.0,
-		ScaleX: 1.0,
-		ScaleY: 1.0,
-		Rotation: 0.0,
 		Layer: 5,
 	}
 	
@@ -83,9 +74,6 @@ func TestSceneInstantiateWork(t *testing.T) {
 	mo5.Transform = core.Transform{
 		PositionX: 0.0,
 		PositionY: -40.0,
-		ScaleX: 1.0,
-		ScaleY: 1.0,
-		Rotation: 0.0,
 		Layer: 5,
 	}
 
@@ -97,9 +85,6 @@ func TestSceneInstantiateWork(t *testing.T) {
 	mo3.Transform = core.Transform{
 		PositionX: 0.0,
 		PositionY: -40.0,
-		ScaleX: 1.0,
-		ScaleY: 1.0,
-		Rotation: 0.0,
 		Layer: 5,
 	}
 	mo0.AddChild(mo3)

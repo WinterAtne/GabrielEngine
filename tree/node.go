@@ -52,15 +52,27 @@ func NewNode(script Script, name string) *Node {
 		Script: script,
 	}
 
-	node.Script.OnInit()
+	CallDeffered(func() {node.Script.OnInit()})
 
 	return node
 }
 
-// Places a node as the child of parent. Places child in the queue.
+// Places a node as the child of parent. If parent is queued, action is defered
+// to the end of the frame, and the child is queued. Otherwise the action is
+// imediate, and the child is not queued.
 func (parent *Node) AddChild(child *Node) {
+	if parent.index == -1 {
+		addChild(parent, child)
+	} else {
+		CallDeffered(func() {
+			addChild(parent, child)
+			child.queueAdd()
+		})
+	}
 
-	CallDeffered(func() {
+}
+
+func addChild(parent, child *Node) {
 	if child == nil {
 		log.Printf("Warning: attempted to give nil child parent")
 		return
@@ -71,13 +83,9 @@ func (parent *Node) AddChild(child *Node) {
 
 	child.parent = parent
 	parent.children = append(parent.children, child)
-	if parent.index != -1 {
-		child.queueAdd()
-	}
-	})
 }
 
-// Removes the parent of child. Also removes child from the queue.
+// Removes the parent of child. Also removes child from the queue if parent is queued.
 func (child *Node) RemoveParent() {
 	CallDeffered(func() {
 	// Second condition should never happen if the first condition is true
