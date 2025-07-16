@@ -12,6 +12,12 @@ type mockNode struct {
 	Object
 	Prop0, Prop1 float32
 	Prop2, Prop3 string
+	Prop4 mockStruct
+}
+
+type mockStruct struct {
+	Prop5 float32
+	Prop6 int32
 }
 
 func init() {
@@ -19,6 +25,9 @@ func init() {
 }
 
 func nodePrint(a *Node) {
+	if a == nil {
+		return
+	}
 	fmt.Println(a)
 	for _, c := range a.children {
 		nodePrint(c)
@@ -69,6 +78,7 @@ func TestSceneInstantiateWork(t *testing.T) {
 		Prop1: 6.66,
 		Prop2: "hihi",
 		Prop3: "byebye",
+		Prop4: mockStruct{0.66, 4},
 	}, "o5")
 	mo5.Transform = core.Transform{
 		PositionX: 0.0,
@@ -98,7 +108,7 @@ func TestSceneInstantiateWork(t *testing.T) {
 	scene := GetScene("test_work.json")
 	test_work, err := scene.Instantiate()
 	if err != nil || test_work == nil {
-		t.Error("test_work failled")
+		t.Errorf("test_work failled")
 	}
 
 	Process(0)
@@ -110,7 +120,6 @@ func TestSceneInstantiateWork(t *testing.T) {
 		nodePrint(test_work)
 		fmt.Println()
 
-		fmt.Printf("%v\n%v\n", test_work.children[0].children[2].Script, mo5.Script)
-		t.Errorf("something")
+		t.Errorf("\n%v\n%v\n", test_work.children[0].children[2].Script, mo5.Script)
 	}
 }

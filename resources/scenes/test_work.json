@@ -14,6 +14,10 @@
 					"Prop1": 6.66,
 					"Prop2": "hihi",
 					"Prop3": "byebye",
+					"Prop4": {
+						"Prop5": 0.66,
+						"Prop6": 4
+					},
 					
 					"transform": {
 						"PositionX": 0.0,
