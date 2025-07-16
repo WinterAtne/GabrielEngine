@@ -7,10 +7,11 @@ import (
 
 func main() {
 	core.Start()
+	tree.LoadScenes()
 
 	scene := tree.GetScene("main.json")
-	node_0 := scene.Instantiate()
-	if node_0 != nil {
+	node_0, err := scene.Instantiate()
+	if node_0 != nil && err == nil {
 		tree.GetRoot().AddChild(node_0)
 	}
 

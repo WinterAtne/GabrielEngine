@@ -1,0 +1,30 @@
+{
+	"type": "Object",
+	"name": "test_work",
+
+	"children": [
+		{
+			"scene": "test_work_child.json",
+			"children": [
+				{
+					"type": "mockNode",
+					"name": "o5",
+
+					"Prop0": 5.0,
+					"Prop1": 6.66,
+					"Prop2": "hihi",
+					"Prop3": "byebye",
+					
+					"transform": {
+						"PositionX": 0.0,
+						"PositionY": -40.0,
+						"ScaleX": 1.0,
+						"ScaleY": 1.0,
+						"Rotation": 0.0,
+						"Layer": 5
+					}
+				}
+			]
+		}
+	]
+}

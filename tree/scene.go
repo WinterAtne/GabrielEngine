@@ -22,25 +22,23 @@ var scenes map[string]*Scene = make(map[string]*Scene)
 
 var typeToScript map[string](func() Script) = make(map[string]func() Script)
 
-func init() {
-	loadScenes()
-}
-
-func loadScenes() {
+func LoadScenes() {
 	const scenesDir string = "resources/scenes/"
 
 	files, err := os.ReadDir(scenesDir)
-	if err != nil {
-		panic(err)
+	if err != nil { 
+		// Failling to load one scene is fine
+		// Failling to load every scene is unrecoverable
+		panic("Failled to load scenes")
 	}
 
 	for _, file := range files {
 		if file.IsDir() { continue }
 
 		var scene *Scene = new(Scene)
-		sceneDefByte, err := os.ReadFile(scenesDir+ file.Name())
+		sceneDefByte, err := os.ReadFile(scenesDir + file.Name())
 		if err != nil {
-			panic("Couldn't load scene " + file.Name())
+			log.Printf("Failled to read scene file: %s", file.Name())
 		}
 
 		if json.Valid(sceneDefByte) {
@@ -68,12 +66,12 @@ func GetScene(name string) *Scene {
 
 // Instantiates a scene and returns the scene root.
 // if the scene failles to instance, it will log an error and return nil.
-func (scene *Scene) Instantiate() *Node {
+func (scene *Scene) Instantiate() (*Node, error) {
 	const errorMessage string = "Failled to instance node: %s"
 	
 	if scene == nil {
 		log.Printf(errorMessage, "scene does not exist or is not valid")
-		return nil
+		return nil, nil
 	}
 
 	var sceneRoot *Node
@@ -84,7 +82,7 @@ func (scene *Scene) Instantiate() *Node {
 		sceneRoot = nil
 	}
 
-	return sceneRoot
+	return sceneRoot, err
 }
 
 var childError = errors.New("Child Error") // Some child of sceneRoot encountered an error

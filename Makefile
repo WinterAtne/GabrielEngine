@@ -38,6 +38,7 @@ GO_BUILD := $(GO) build
 GO_DEBUG_FLAGS := -asan -gcflags="all=-N -l"
 GO_RUN_DEBUG := $(GO_RUN) $(GO_DEBUG_FLAGS)
 GO_BUILD_DEBUG := $(GO_BUILD) $(GO_DEBUG_FLAGS)
+GO_TEST := $(GO) test $(GO_DEBUG_FLAGS)
 GO_CLEAN := $(GO) clean -cache
 
 GO_OUT_EXE := $(OUT_CMD_DIR)/$(NAME)
@@ -64,6 +65,10 @@ debug_build: $(GO_OUT_EXE_DEBUG)
 .PHONY: debug
 debug: $(GO_OUT_EXE_DEBUG)
 	$(DELVE) $<
+
+.PHONY: test
+test: debug_ccore
+	$(GO_TEST) ./...
 
 $(GO_OUT_EXE_DEBUG): debug_ccore
 	CGO_CFLAGS="$(CFLAGS_DEBUG)" $(GO_BUILD_DEBUG) -o $@ .

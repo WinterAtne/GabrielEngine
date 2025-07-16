@@ -1,0 +1,58 @@
+{
+	"type": "Object",
+	"name": "example",
+
+	"transform": {
+		"PositionX": 0.0,
+		"PositionY": 64.0,
+		"ScaleX": 1.0,
+		"ScaleY": 1.0,
+		"Rotation": 0.0,
+		"Layer": 1
+	},
+
+	"children": [
+		{
+			"type": "Object",
+			"name": "o0",
+
+			"transform": {
+				"PositionX": -40.0,
+				"PositionY": 0.0,
+				"ScaleX": 1.0,
+				"ScaleY": 1.0,
+				"Rotation": 0.0,
+				"Layer": 5
+			}, 
+
+			"children": [
+				{
+					"type": "Object",
+					"name": "o3",
+
+					"transform": {
+						"PositionX": 0.0,
+						"PositionY": -40.0,
+						"ScaleX": 1.0,
+						"ScaleY": 1.0,
+						"Rotation": 0.0,
+						"Layer": 5
+					}
+				}
+			]
+		},
+		{
+			"type": "Object",
+			"name": "o1",
+
+			"transform": {
+				"PositionX": 32.0,
+				"PositionY": 0.0,
+				"ScaleX": 1.0,
+				"ScaleY": 1.0,
+				"Rotation": 0.0,
+				"Layer": 5
+			}
+		}
+	]
+}
