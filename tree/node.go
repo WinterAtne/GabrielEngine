@@ -44,19 +44,6 @@ var defferedCalls []func()
 
 /* --- Queue / Tree Operations --- */
 
-// Creates a new unqueued node.
-// func NewNode(script Script, name string) *Node {
-// 	node := &Node{
-// 		name: name,
-// 		index: -1,
-// 		Script: script,
-// 	}
-//
-// 	CallDeffered(func() {node.Script.OnInit()})
-//
-// 	return node
-// }
-
 // Places a node as the child of parent. If parent is queued, action is defered
 // to the end of the frame, and the child is queued. Otherwise the action is
 // imediate, and the child is not queued.
