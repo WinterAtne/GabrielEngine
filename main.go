@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/WinterAtne/GabrielEngine/core"
 	"github.com/WinterAtne/GabrielEngine/tree"
 )
@@ -13,10 +15,12 @@ func main() {
 	node_0, err := scene.Instantiate()
 	if node_0 != nil && err == nil {
 		tree.GetRoot().AddChild(node_0)
+	} else {
+		log.Fatalln("Main node is nil")
 	}
 
-	finish := true
-	for finish {
+	for finish := true; finish != false; {
+			node_0.Transform.PositionX -= 0.5
 		tree.Process(0)
 		core.FinishFrame()
 		finish = core.BlockTillNextFrame()	
