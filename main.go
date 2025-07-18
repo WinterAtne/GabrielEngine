@@ -20,7 +20,6 @@ func main() {
 	}
 
 	for finish := true; finish != false; {
-			node_0.Transform.PositionX -= 0.5
 		tree.Process(0)
 		core.FinishFrame()
 		finish = core.BlockTillNextFrame()	

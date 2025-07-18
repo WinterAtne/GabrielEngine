@@ -4,7 +4,11 @@ var root *Node
 
 /* Init */
 func init() {
-	root = NewNode(new(rootObject), "root")
+	root = &Node{
+		index: -1,
+		name: "root",
+		Script: new(rootObject),
+	}
 	root.queueAdd()
 }
 

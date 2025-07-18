@@ -20,11 +20,11 @@ import (
 // Can have many children. None of these are accessed directly, and are instead
 // modified through the functions defined below.
 type Node struct {
+	Script
 	name string
 	index int
 	parent *Node
 	children []*Node
-	Script
 
 	Transform core.Transform
 }
@@ -45,17 +45,17 @@ var defferedCalls []func()
 /* --- Queue / Tree Operations --- */
 
 // Creates a new unqueued node.
-func NewNode(script Script, name string) *Node {
-	node := &Node{
-		name: name,
-		index: -1,
-		Script: script,
-	}
-
-	CallDeffered(func() {node.Script.OnInit()})
-
-	return node
-}
+// func NewNode(script Script, name string) *Node {
+// 	node := &Node{
+// 		name: name,
+// 		index: -1,
+// 		Script: script,
+// 	}
+//
+// 	CallDeffered(func() {node.Script.OnInit()})
+//
+// 	return node
+// }
 
 // Places a node as the child of parent. If parent is queued, action is defered
 // to the end of the frame, and the child is queued. Otherwise the action is

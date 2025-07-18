@@ -104,8 +104,11 @@ func (node *Node) UnmarshalJSON(data []byte) error {
 		script := scriptInstance()
 
 		name := string(defs["name"])[1:len(defs["name"])-1]
-		newNode := NewNode(script, name)
-		*node = *newNode
+		*node = Node{
+			index: -1,
+			name: name,
+			Script: script,
+		}
 
 		
 		err = json.Unmarshal(data, &node.Script)
@@ -157,9 +160,12 @@ func (node *Node) UnmarshalJSON(data []byte) error {
 				}
 			}
 
+			child.OnInit()
 			node.AddChild(child)
 		}
 	}
+
+	node.OnInit()
 
 	return nil
 }
