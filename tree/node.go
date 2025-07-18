@@ -29,12 +29,13 @@ type Node struct {
 	Transform core.Transform
 }
 
-// Represents a script, attached to a node. Node represents the attached node.
+// Represents a script, attached to a node.
 type Script interface {
-	OnInit()
-	OnStart(node *Node)
-	OnProcess(_delta float32)
-	OnRemove()
+	Init(node *Node) // Called when a node is instanced
+	Ready() // Called when a scene is finished loading
+	Start() // Called when a node is added to the queue
+	Process(_delta float32) // Called once per frame
+	Remove() // Called when a node is removed from the queue
 }
 
 // The node queue. Nodes in the queue are processed. Those which are not... are not.
@@ -59,6 +60,7 @@ func (parent *Node) AddChild(child *Node) {
 
 }
 
+// Helper function for AddChild()
 func addChild(parent, child *Node) {
 	if child == nil {
 		log.Printf("Warning: attempted to give nil child parent")
@@ -99,7 +101,7 @@ func (node *Node) queueAdd() {
 	for _, n := range node.children {
 		n.queueAdd()
 	}
-	node.Script.OnStart(node)
+	node.Start()
 }
 
 // Recursively removes a node and its children from the queue.
@@ -111,7 +113,7 @@ func (node *Node) queueRemove() {
 	queue[node.index].index = node.index
 	queue = queue[:len(queue) - 1]
 	node.index = -1
-	node.Script.OnRemove()
+	node.Remove()
 }
 
 /* --- Processes --- */
@@ -119,7 +121,7 @@ func (node *Node) queueRemove() {
 // Calls OnProcess on all node.Scripts in the queue.
 func Process(_delta float32) {
 	for _, node := range queue {
-		node.Script.OnProcess(_delta)
+		node.Process(_delta)
 	}
 
 	for _, call := range defferedCalls {

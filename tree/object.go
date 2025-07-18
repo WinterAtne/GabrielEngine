@@ -16,13 +16,15 @@ func init() {
 	RegisterScriptName("Object", func() Script {return new(Object)})
 }
 
-func (obj *Object) OnInit() {}
-
-func (obj *Object) OnStart(node *Node) {
+func (obj *Object) Init(node *Node) {
 	obj.node = node
 }
 
-func (obj *Object) OnProcess(_delta float32) {}
+func (obj *Object) Ready() {}
 
-func (obj *Object) OnRemove() {}
+func (obj *Object) Start() {}
+
+func (obj *Object) Process(_delta float32) {}
+
+func (obj *Object) Remove() {}
 

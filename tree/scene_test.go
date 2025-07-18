@@ -37,6 +37,18 @@ func nodePrint(a *Node) {
 	}
 }
 
+func NewNode(script Script, name string) *Node {
+	node := &Node{
+		name: name,
+		index: -1,
+		Script: script,
+	}
+
+	node.Init(node)
+
+	return node
+}
+
 // Validates that scene.Instantiate can properly instante a working node which
 // is defined in resources/scenes/test_work.json & test_work_child.json
 func TestSceneInstantiateWork(t *testing.T) {

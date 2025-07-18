@@ -16,12 +16,12 @@ func init() {
 }
 
 /* Script Methods */
-func (sprite *Sprite) OnInit() {
-	sprite.Object.OnInit()
+func (sprite *Sprite) Init(node *Node) {
+	sprite.Object.Init(node)
 }
 
-func (sprite *Sprite) OnStart(node *Node) {
-	sprite.Object.OnStart(node)
+func (sprite *Sprite) Start() {
+	sprite.Object.Start()
 	sprite.tree = sprite.node.GetTree()
 
 	if sprite.Shader == nil {
@@ -29,12 +29,12 @@ func (sprite *Sprite) OnStart(node *Node) {
 	}
 }
 
-func (sprite *Sprite) OnProcess(_delta float32) {
-	sprite.Object.OnProcess(_delta)
+func (sprite *Sprite) Process(_delta float32) {
+	sprite.Object.Process(_delta)
 
 	core.QueueSprite(GlobalTransform(sprite.tree), sprite.Texture, sprite.Shader)
 }
 
-func (sprite *Sprite) OnRemove() {
-	sprite.Object.OnRemove()
+func (sprite *Sprite) Remove() {
+	sprite.Object.Remove()
 }

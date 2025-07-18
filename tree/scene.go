@@ -115,6 +115,8 @@ func (node *Node) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return fmt.Errorf("%w: failled to get script properties: %w", instanceError, err)
 		}
+
+		node.Init(node)
 		
 	} else if sceneName, has := defs["scene"]; has {
 
@@ -160,12 +162,9 @@ func (node *Node) UnmarshalJSON(data []byte) error {
 				}
 			}
 
-			child.OnInit()
 			node.AddChild(child)
 		}
 	}
-
-	node.OnInit()
 
 	return nil
 }
